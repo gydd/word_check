@@ -74,7 +74,13 @@ public class UserServiceImpl implements UserService {
         }
         
         // 4. 生成JWT令牌
-        String token = jwtUtil.generateToken(user.getId());
+        String token;
+        try {
+            token = jwtUtil.generateToken(user.getId());
+        } catch (Exception e) {
+            log.error("生成JWT令牌失败", e);
+            throw new RuntimeException("登录失败：令牌生成错误");
+        }
         
         // 5. 构建返回对象
         LoginResponseDTO response = new LoginResponseDTO();
@@ -277,6 +283,7 @@ public class UserServiceImpl implements UserService {
         user.setNickname("用户" + openid.substring(openid.length() - 6));
         user.setAvatarUrl("https://example.com/default-avatar.png");
         user.setGender(0);
+        user.setStatus(1);
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
         

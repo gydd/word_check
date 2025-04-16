@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +28,11 @@ public class JwtUtil {
 
     @Value("${jwt.expiration}")
     private Long expiration;
+    
+    // 用于签名的密钥
+    private byte[] getSigningKey() {
+        return Base64.getEncoder().encode(secret.getBytes(StandardCharsets.UTF_8));
+    }
 
     /**
      * 从令牌中获取用户ID
@@ -125,7 +132,7 @@ public class JwtUtil {
      */
     private Claims getClaimsFromToken(String token) {
         return Jwts.parser()
-                .setSigningKey(secret)
+                .setSigningKey(getSigningKey())
                 .parseClaimsJws(token)
                 .getBody();
     }
@@ -146,7 +153,7 @@ public class JwtUtil {
                 .setSubject(subject)
                 .setIssuedAt(now)
                 .setExpiration(expirationDate)
-                .signWith(SignatureAlgorithm.HS512, secret)
+                .signWith(SignatureAlgorithm.HS512, getSigningKey())
                 .compact();
     }
 } 

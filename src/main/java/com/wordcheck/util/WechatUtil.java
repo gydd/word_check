@@ -6,9 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.ResourceAccessException;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.Cipher;
@@ -37,7 +39,14 @@ public class WechatUtil {
     private final ObjectMapper objectMapper;
     
     public WechatUtil() {
-        this.restTemplate = new RestTemplate();
+        // 创建带有超时设置的RestTemplate
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        // 设置读取超时为10秒
+        requestFactory.setReadTimeout(10000);
+        // 设置连接超时为10秒
+        requestFactory.setConnectTimeout(10000);
+        
+        this.restTemplate = new RestTemplate(requestFactory);
         this.objectMapper = new ObjectMapper();
         // 初始化BouncyCastle
         Security.addProvider(new BouncyCastleProvider());
@@ -53,6 +62,8 @@ public class WechatUtil {
         try {
             String url = "https://api.weixin.qq.com/sns/jscode2session?appid=" + appId
                     + "&secret=" + appSecret + "&js_code=" + jsCode + "&grant_type=authorization_code";
+            
+            logger.info("正在请求微信API: {}", url);
             
             ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
             String responseBody = response.getBody();
@@ -70,6 +81,9 @@ public class WechatUtil {
             }
             
             return result;
+        } catch (ResourceAccessException e) {
+            logger.error("调用微信登录API超时", e);
+            throw new RuntimeException("微信服务器请求超时，请稍后重试", e);
         } catch (Exception e) {
             logger.error("调用微信登录API失败", e);
             throw new RuntimeException("微信登录失败", e);

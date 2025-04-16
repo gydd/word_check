@@ -249,6 +249,8 @@ const wxLogin = function(code) {
       header: {
         'Content-Type': 'application/json'
       },
+      // 增加超时时间到30秒
+      timeout: 30000,
       success: function(res) {
         console.log('微信登录响应:', res);
         
@@ -288,8 +290,13 @@ const wxLogin = function(code) {
       },
       fail: function(err) {
         console.error('微信登录请求失败:', err);
+        // 根据错误类型提供更明确的提示
+        let errMsg = '网络连接失败';
+        if (err.errMsg && err.errMsg.includes('timeout')) {
+          errMsg = '服务器响应超时，请检查网络后重试';
+        }
         wx.showToast({
-          title: '网络连接失败',
+          title: errMsg,
           icon: 'none',
           duration: 2000
         });
@@ -462,6 +469,8 @@ const fallbackWxLogin = function(code) {
         'X-Skip-Auth': 'true',  // 特殊标记，用于告知后端跳过JWT验证
         'Content-Type': 'application/json'
       },
+      // 增加超时时间到30秒
+      timeout: 30000,
       success: function(res) {
         console.log('备用微信登录响应:', res);
         
@@ -501,8 +510,13 @@ const fallbackWxLogin = function(code) {
       },
       fail: function(err) {
         console.error('备用微信登录请求失败:', err);
+        // 根据错误类型提供更明确的提示
+        let errMsg = '网络连接失败';
+        if (err.errMsg && err.errMsg.includes('timeout')) {
+          errMsg = '服务器响应超时，请检查网络后重试';
+        }
         wx.showToast({
-          title: '网络连接失败',
+          title: errMsg,
           icon: 'none',
           duration: 2000
         });

@@ -41,13 +41,39 @@ public class AuthController {
                 return ApiResponse.error(400, "缺少微信授权码");
             }
             
+            // 记录开始时间，用于监控处理时间
+            long startTime = System.currentTimeMillis();
+            log.info("开始处理微信登录请求，code: {}", code);
+            
             // 调用微信登录服务
             LoginResponseDTO response = userService.wxLogin(code);
+            
+            // 计算处理时间并记录
+            long endTime = System.currentTimeMillis();
+            log.info("完成微信登录请求处理，耗时: {}ms", (endTime - startTime));
             
             return ApiResponse.success(response);
         } catch (Exception e) {
             log.error("微信登录失败", e);
-            return ApiResponse.error(500, "登录失败：" + e.getMessage());
+            
+            // 区分不同类型的错误，提供更精确的错误信息
+            String errorMessage;
+            int errorCode = 500;
+            
+            if (e.getMessage() != null && e.getMessage().contains("超时")) {
+                errorMessage = "服务器请求超时，请稍后重试";
+                errorCode = 504; // Gateway Timeout
+            } else if (e.getMessage() != null && e.getMessage().contains("令牌生成错误")) {
+                errorMessage = "登录授权失败，请重试";
+                errorCode = 500;
+            } else if (e.getCause() instanceof java.net.SocketTimeoutException) {
+                errorMessage = "服务器响应超时，请稍后重试";
+                errorCode = 504; // Gateway Timeout
+            } else {
+                errorMessage = "登录失败：" + e.getMessage();
+            }
+            
+            return ApiResponse.error(errorCode, errorMessage);
         }
     }
     
