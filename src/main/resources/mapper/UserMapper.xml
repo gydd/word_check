@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wordcheck.mapper.UserMapper">
+    <!-- 查询用户信息 -->
+    <select id="findById" resultType="com.wordcheck.model.User">
+        SELECT * FROM users WHERE id = #{id}
+    </select>
+    
+    <!-- 根据openid查询用户 -->
+    <select id="findByOpenid" resultType="com.wordcheck.model.User">
+        SELECT * FROM users WHERE openid = #{openid}
+    </select>
+    
+    <!-- 插入新用户 -->
+    <insert id="insert" parameterType="com.wordcheck.model.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users (openid, phone, nickname, avatar_url, gender, status, created_at, updated_at)
+        VALUES (#{openid}, #{phone}, #{nickname}, #{avatarUrl}, #{gender}, #{status}, NOW(), NOW())
+    </insert>
+    
+    <!-- 更新用户信息 -->
+    <update id="update" parameterType="com.wordcheck.model.User">
+        UPDATE users
+        SET 
+            phone = #{phone},
+            nickname = #{nickname},
+            avatar_url = #{avatarUrl},
+            gender = #{gender},
+            status = #{status},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+</mapper> 

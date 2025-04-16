@@ -1,0 +1,76 @@
+<!-- recharge.wxml -->
+<view class="container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="title">积分充值</view>
+    <view class="subtitle">当前积分: {{userPoints}} 分</view>
+  </view>
+
+  <!-- 充值金额选择 -->
+  <view class="recharge-options">
+    <view class="section-title">选择充值金额</view>
+    <view class="options-grid">
+      <view class="option-item {{selectedOption === index ? 'selected' : ''}}" 
+            wx:for="{{rechargeOptions}}" 
+            wx:key="index" 
+            bindtap="selectOption" 
+            data-index="{{index}}">
+        <view class="option-amount">{{item.amount}}元</view>
+        <view class="option-points">{{item.points}}积分</view>
+        <view class="option-tag" wx:if="{{item.tag}}">{{item.tag}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 自定义金额 -->
+  <view class="custom-amount">
+    <view class="section-title">自定义金额</view>
+    <view class="input-container">
+      <input class="amount-input" 
+             type="digit" 
+             placeholder="请输入充值金额（元）" 
+             value="{{customAmount}}"
+             bindinput="inputCustomAmount" />
+      <view class="input-suffix">元</view>
+    </view>
+    <view class="estimated-points" wx:if="{{customAmount}}">
+      预计获得：{{estimatedPoints}} 积分
+    </view>
+  </view>
+
+  <!-- 支付方式 -->
+  <view class="payment-methods">
+    <view class="section-title">支付方式</view>
+    <view class="methods-list">
+      <view class="method-item {{paymentMethod === 'wxpay' ? 'selected' : ''}}" bindtap="selectPaymentMethod" data-method="wxpay">
+        <view class="method-icon">
+          <image src="/static/images/wxpay.png" mode="aspectFit"></image>
+        </view>
+        <view class="method-name">微信支付</view>
+        <view class="method-selected" wx:if="{{paymentMethod === 'wxpay'}}">
+          <text class="iconfont icon-check"></text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 充值须知 -->
+  <view class="recharge-notice">
+    <view class="notice-title">充值须知</view>
+    <view class="notice-content">
+      <text>1. 充值后的积分不会过期，可长期使用；</text>
+      <text>2. 1元=10积分，充值金额越多，赠送积分越多；</text>
+      <text>3. 充值成功后，积分将立即到账；</text>
+      <text>4. 如有问题，请联系客服。</text>
+    </view>
+  </view>
+
+  <!-- 充值按钮 -->
+  <view class="action-area">
+    <button class="recharge-button {{canRecharge ? '' : 'disabled'}}" 
+            bindtap="rechargePoints" 
+            disabled="{{!canRecharge || isProcessing}}">
+      {{isProcessing ? '处理中...' : '立即充值'}}
+    </button>
+  </view>
+</view> 

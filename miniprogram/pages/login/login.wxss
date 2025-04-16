@@ -1,0 +1,75 @@
+/* pages/login/login.wxss */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60rpx 50rpx;
+  height: 100vh;
+  box-sizing: border-box;
+  background-color: #f8f8f8;
+}
+
+.logo-section {
+  margin-top: 60rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logo {
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: 20rpx;
+}
+
+.app-title {
+  margin-top: 30rpx;
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.login-form {
+  width: 100%;
+  margin-top: 80rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.welcome-text {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.desc-text {
+  font-size: 28rpx;
+  color: #888;
+  margin-bottom: 60rpx;
+}
+
+.login-btn {
+  width: 80% !important;
+  height: 90rpx;
+  line-height: 90rpx;
+  font-size: 32rpx;
+  color: #fff;
+  background-color: #3498db;
+  border-radius: 45rpx;
+  margin-bottom: 30rpx;
+}
+
+.phone-login {
+  background-color: #fff;
+  color: #3498db;
+  border: 1px solid #3498db;
+}
+
+.policy-text {
+  position: fixed;
+  bottom: 60rpx;
+  font-size: 24rpx;
+  color: #999;
+} 

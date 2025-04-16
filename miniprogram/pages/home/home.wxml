@@ -1,0 +1,58 @@
+<view class="container">
+  <!-- 加载中 -->
+  <view class="loading" wx:if="{{loading}}">
+    <view class="loading-icon"></view>
+  </view>
+
+  <!-- 头部用户信息 -->
+  <view class="header" wx:if="{{userInfo}}">
+    <view class="user-info">
+      <image class="avatar" src="{{userInfo.avatarUrl || '/static/images/default-avatar.png'}}"></image>
+      <view class="user-detail">
+        <view class="nickname">{{userInfo.nickname || '未设置昵称'}}</view>
+        <view class="user-level">Lv.{{userInfo.level}} {{userInfo.levelName}}</view>
+      </view>
+    </view>
+    <view class="points-info">
+      <view class="points-value">{{userInfo.points}}</view>
+      <view class="points-label">我的积分</view>
+    </view>
+  </view>
+
+  <!-- 签到区域 -->
+  <view class="sign-in-section">
+    <view class="sign-in-title">每日签到</view>
+    <view class="sign-in-days" wx:if="{{signInStatus}}">
+      <view class="sign-in-text">已连续签到 {{signInStatus.continuousDays}} 天</view>
+      <view class="sign-in-total">累计签到 {{signInStatus.totalSignDays}} 天</view>
+    </view>
+    <button class="sign-in-btn {{signInStatus.todaySigned ? 'signed' : ''}}" bindtap="handleSignIn">
+      {{signInStatus.todaySigned ? '已签到' : '签到'}}
+    </button>
+  </view>
+
+  <!-- 轮播图 -->
+  <swiper class="banner" indicator-dots="true" autoplay="true" interval="3000" duration="500">
+    <block wx:for="{{carouselImages}}" wx:key="*this">
+      <swiper-item>
+        <image src="{{item}}" class="banner-image" mode="aspectFill"></image>
+      </swiper-item>
+    </block>
+  </swiper>
+
+  <!-- 功能区域 -->
+  <view class="features">
+    <view class="feature-title">功能导航</view>
+    <view class="feature-grid">
+      <view class="feature-item" wx:for="{{features}}" wx:key="id" bindtap="navigateToFeature" data-url="{{item.url}}">
+        <image class="feature-icon" src="{{item.icon}}"></image>
+        <view class="feature-name">{{item.name}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部说明 -->
+  <view class="footer">
+    <view class="footer-text">每日使用，提升英语水平</view>
+  </view>
+</view> 

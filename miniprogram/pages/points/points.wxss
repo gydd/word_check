@@ -1,0 +1,275 @@
+/* pages/points/points.wxss */
+.points-container {
+  background-color: #f8f8f8;
+  min-height: 100vh;
+  padding-bottom: 30rpx;
+}
+
+/* 积分概览卡片 */
+.points-overview-card {
+  margin: 30rpx;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  border-radius: 20rpx;
+  padding: 40rpx 30rpx;
+  color: #fff;
+  box-shadow: 0 4rpx 12rpx rgba(52, 152, 219, 0.3);
+}
+
+.current-points-label {
+  font-size: 28rpx;
+  opacity: 0.9;
+}
+
+.current-points-value {
+  font-size: 70rpx;
+  font-weight: bold;
+  margin: 10rpx 0 30rpx;
+}
+
+.points-level {
+  margin-top: 20rpx;
+}
+
+.level-label {
+  font-size: 26rpx;
+  margin-bottom: 15rpx;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10rpx;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 10rpx;
+  overflow: hidden;
+}
+
+.progress-inner {
+  height: 100%;
+  background-color: #fff;
+  border-radius: 10rpx;
+}
+
+.level-info {
+  margin-top: 15rpx;
+  font-size: 24rpx;
+  opacity: 0.9;
+}
+
+.highlight {
+  font-weight: bold;
+  color: #fff;
+}
+
+.points-statistics {
+  display: flex;
+  margin-top: 40rpx;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.2);
+  padding-top: 30rpx;
+}
+
+.statistics-item {
+  flex: 1;
+  text-align: center;
+}
+
+.statistics-value {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.statistics-label {
+  font-size: 24rpx;
+  opacity: 0.9;
+  margin-top: 10rpx;
+}
+
+/* 积分获取方式 */
+.points-section {
+  margin: 30rpx;
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 30rpx;
+}
+
+.points-ways {
+  
+}
+
+.points-way-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.points-way-item:last-child {
+  border-bottom: none;
+}
+
+.way-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 40rpx;
+  margin-right: 20rpx;
+}
+
+.sign-in-icon {
+  background-color: rgba(52, 152, 219, 0.1);
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IiMzNDk4ZGIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTIwLjUgMTFoLTQuOTJsLTEuNS00LjVhLjUuNSAwIDAwLS45NSAwbC0xLjUgNC41SDYuOTJhLjUuNSAwIDAwLS4zLjkybDQgMi45MS0xLjUgNC41YS41LjUgMCAwMC43NyAuNTdMMTIgMTZsNC4xMSAzYS41LjUgMCAwMC43Ny0uNTdsLTEuNS00LjUgNC0yLjkxYS41LjUgMCAwMC0uMy0uOTJ6TTEyIDIuMjVhOS43NSA5Ljc1IDAgMTAwIDE5LjUgOS43NSA5Ljc1IDAgMDAwLTE5LjV6TTEyIDIwYTggOCAwIDExMC0xNiA4IDggMCAwMTAgMTZ6Ii8+PC9zdmc+');
+}
+
+.check-icon {
+  background-color: rgba(46, 204, 113, 0.1);
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IiMyZWNjNzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTIwLjI5NTggNi4yOTVhMS4wMDUgMS4wMDUgMCAwMC0xLjQxIDBMOSAxNi4xNzA3bC0zLjU4LTMuNThhMSAxIDAgMDAtMS40MiAxLjQxNGw0LjI5IDQuMzA4YTEgMSAwIDAwMS40MiAwbDEwLjU5LTEwLjU3YTEuMDA1IDEuMDA1IDAgMDAwLTEuNDJ2LS4wMDh6Ii8+PC9zdmc+');
+}
+
+.recharge-icon {
+  background-color: rgba(230, 126, 34, 0.1);
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IiNlNjdlMjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTIwIDRINGMtMS4xMSAwLTEuOTkuODktMS45OSAyTDIgMThjMCAxLjExLjg5IDIgMiAyaDE2YzEuMTEgMCAyLS44OSAyLTJWNmMwLTEuMTEtLjg5LTItMi0yem0tMSAxNEg1Yy0uNTUgMC0xLS40NS0xLTFzLjQ1LTEgMS0xaDE0Yy41NSAwIDEgLjQ1IDEgMXMtLjQ1IDEtMSAxem0wLTZINWMtLjU1IDAtMS0uNDUtMS0xcy40NS0xIDEtMWgxNGMuNTUgMCAxIC40NSAxIDFzLS40NSAxLTEgMXptMC02SDVjLS41NSAwLTEtLjQ1LTEtMXMuNDUtMSAxLTFoMTRjLjU1IDAgMSAuNDUgMSAxcy0uNDUgMS0xIDF6Ii8+PC9zdmc+');
+}
+
+.way-info {
+  flex: 1;
+}
+
+.way-title {
+  font-size: 30rpx;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.way-desc {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.way-action {
+  font-size: 28rpx;
+  color: #3498db;
+  background-color: rgba(52, 152, 219, 0.1);
+  padding: 12rpx 24rpx;
+  border-radius: 30rpx;
+}
+
+/* 积分记录 */
+.points-records-section {
+  margin: 30rpx;
+  background-color: #fff;
+  border-radius: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  padding-bottom: 30rpx;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 30rpx 0;
+  font-size: 30rpx;
+  color: #666;
+  position: relative;
+}
+
+.tab.active {
+  color: #3498db;
+  font-weight: bold;
+}
+
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60rpx;
+  height: 6rpx;
+  background-color: #3498db;
+  border-radius: 3rpx;
+}
+
+.records-list {
+  padding: 20rpx 30rpx;
+}
+
+.record-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.record-item:last-child {
+  border-bottom: none;
+}
+
+.record-reason {
+  font-size: 30rpx;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.record-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.record-points {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.record-points.earn {
+  color: #2ecc71;
+}
+
+.record-points.spend {
+  color: #e74c3c;
+}
+
+.load-more {
+  text-align: center;
+  padding: 20rpx 0;
+}
+
+.loading {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.load-more-btn {
+  font-size: 28rpx;
+  color: #3498db;
+}
+
+/* 无记录提示 */
+.empty-records {
+  padding: 60rpx 0;
+  text-align: center;
+}
+
+.empty-icon {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+} 

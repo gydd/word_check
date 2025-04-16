@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wordcheck.mapper.PointRecordMapper">
+    <!-- 根据ID查询积分记录 -->
+    <select id="findById" resultType="com.wordcheck.model.PointRecord">
+        SELECT * FROM point_records WHERE id = #{id}
+    </select>
+    
+    <!-- 插入新的积分记录 -->
+    <insert id="insert" parameterType="com.wordcheck.model.PointRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO point_records (
+            user_id, points, reason, type, action, business_id, 
+            business_type, remark, before_points, after_points, 
+            created_at, updated_at
+        )
+        VALUES (
+            #{userId}, #{points}, #{reason}, #{type}, #{action}, #{businessId}, 
+            #{businessType}, #{remark}, #{beforePoints}, #{afterPoints}, 
+            NOW(), NOW()
+        )
+    </insert>
+    
+    <!-- 根据用户ID和类型查询积分记录 -->
+    <select id="findByUserIdAndType" resultType="com.wordcheck.model.PointRecord">
+        SELECT * FROM point_records 
+        WHERE user_id = #{userId}
+        <if test="type != null and type != 'all'">
+            <choose>
+                <when test="type == 'earn'">
+                    AND action = 'add'
+                </when>
+                <when test="type == 'spend'">
+                    AND action = 'deduct'
+                </when>
+            </choose>
+        </if>
+        ORDER BY created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+    
+    <!-- 根据用户ID和类型统计记录数 -->
+    <select id="countByUserIdAndType" resultType="int">
+        SELECT COUNT(*) FROM point_records 
+        WHERE user_id = #{userId}
+        <if test="type != null and type != 'all'">
+            <choose>
+                <when test="type == 'earn'">
+                    AND action = 'add'
+                </when>
+                <when test="type == 'spend'">
+                    AND action = 'deduct'
+                </when>
+            </choose>
+        </if>
+    </select>
+    
+    <!-- 根据用户ID查询积分记录，带分页 -->
+    <select id="selectByUserIdWithPagination" resultType="com.wordcheck.model.PointRecord">
+        SELECT * FROM point_records 
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+    
+    <!-- 根据用户ID统计记录数 -->
+    <select id="countByUserId" resultType="int">
+        SELECT COUNT(*) FROM point_records 
+        WHERE user_id = #{userId}
+    </select>
+</mapper> 

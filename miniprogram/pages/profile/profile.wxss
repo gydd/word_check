@@ -1,0 +1,193 @@
+/* pages/profile/profile.wxss */
+.profile-container {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  padding-bottom: 40rpx;
+}
+
+/* 用户信息卡片 */
+.user-info-section {
+  padding: 30rpx 30rpx 40rpx;
+}
+
+.user-info-card {
+  background: linear-gradient(135deg, #3498db, #5dade2);
+  border-radius: 20rpx;
+  padding: 40rpx 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+}
+
+.avatar-container {
+  margin-right: 30rpx;
+}
+
+.avatar {
+  width: 130rpx;
+  height: 130rpx;
+  border-radius: 65rpx;
+  border: 4rpx solid #fff;
+}
+
+.user-details {
+  flex: 1;
+  color: #fff;
+}
+
+.nickname {
+  font-size: 38rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+.user-id {
+  font-size: 24rpx;
+  opacity: 0.8;
+  margin-bottom: 20rpx;
+}
+
+.points-info {
+  display: flex;
+  align-items: center;
+}
+
+.points-label {
+  font-size: 26rpx;
+  margin-right: 10rpx;
+}
+
+.points-value {
+  font-size: 34rpx;
+  font-weight: bold;
+  margin-right: 20rpx;
+}
+
+.level-info {
+  font-size: 24rpx;
+  background-color: rgba(255, 255, 255, 0.3);
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+}
+
+.not-login {
+  flex: 1;
+  color: #fff;
+}
+
+.login-tips {
+  font-size: 30rpx;
+  margin-bottom: 20rpx;
+}
+
+.login-btn {
+  background-color: #fff;
+  color: #3498db;
+  font-size: 28rpx;
+  height: 70rpx;
+  line-height: 70rpx;
+  border-radius: 35rpx;
+  padding: 0 40rpx;
+  display: inline-block;
+  font-weight: bold;
+}
+
+/* 菜单部分 */
+.menu-section {
+  padding: 0 30rpx;
+}
+
+.menu-group {
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 0 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  height: 100rpx;
+  position: relative;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-icon {
+  width: 50rpx;
+  height: 50rpx;
+  margin-right: 20rpx;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.points-icon {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IiMzNDk4ZGIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgMThjLTQuNDIgMC04LTMuNTgtOC04czMuNTgtOCA4LTggOCAzLjU4IDggOC0zLjU4IDgtOCA4eiIvPjxwYXRoIGQ9Ik0xMi41IDEwLjdWN2gtMXY0aDRWMTBoLTN6Ii8+PC9zdmc+');
+}
+
+.history-icon {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IiMzNDk4ZGIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEzIDNjLTQuOTcgMC05IDQuMDMtOSA5SDFsMy44OSAzLjg5LjA4LjE0TDkgMTJINmMwLTMuODcgMy4xMy03IDctN3M3IDMuMTMgNyA3LTMuMTMgNy03IDdjLTEuOTMgMC0zLjY4LS43OS00Ljk0LTIuMDZsLTEuNDIgMS40MkM4LjI3IDE5Ljk5IDEwLjUxIDIxIDEzIDIxYzQuOTcgMCA5LTQuMDMgOS05cy00LjAzLTktOS05em0tMSA1djVsNC4yOCAyLjU0LjcyLTEuMjEtMy41LTIuMDhWOEgxMnoiLz48L3N2Zz4=');
+}
+
+.favorites-icon {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IiMzNDk4ZGIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTE3IDN2MThjLTEtMS4zNS0yLjM0LTIuNS00LTMtMS42Ni41LTMgMS42NS00IDNWM2MxIDEuMzUgMi4zNCAyLjUgNCAzIDEuNjYtLjUgMy0xLjY1IDQtM3ptLTItMS42N2MtLjczIDEuMDUtMS44NiAxLjY3LTMgMS42N3MtMi4yNy0uNjItMy0xLjY3VjIwYy43My0xLjA1IDEuODYtMS42NyAzLTEuNjdzMi4yNy42MiAzIDEuNjdWMS4zM3oiLz48L3N2Zz4=');
+}
+
+.settings-icon {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IiMzNDk4ZGIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTE5LjE0IDEyLjkzYy4wNC0uMyAwLS43LS4yLTEuNDZhMTguNzYgMTguNzYgMCAwMDAtLjg2Yy4wNi0uMjcuMTUtLjU5LjItMS4zNi4wNC0uNzYtLjQ1LTEuMTUtMS4yLTEuMTVoLS4xYy0uNzUgMC0xLjI1LjQtMS4zNyAxLjE1LS4wOC44LS4xOSAxLjA1LS4yIDEuMzUtLjA1LjM0LS4wMi42NS0uMDIgMS4zMi4wNi42NiAwIC45OC4wNyAxLjMyLjEuMzkuMi41Mi4zIDEuMjYuMSAuNDYuNTYuOS45OC45LjM2IDAgLjg5LS4xOS45OS0uOXpNMTUuMzUgMTIuNjVsMS4zLTEuM2MuMi0uMi4yLS40IDAtLjZsLTEuMy0xLjNjLS4yLS4yLS40LS4yLS42IDBsLTEuMyAxLjNjLS4yLjItLjIuNC0uMDEuNmwxLjMxIDEuMzFjLjIuMi40LjIuNi0uMDF6bS0zLjQyIDE1LjRsLjA4LS4xIDMuMDYtNS4wNmMuMDctLjEuMDUtLjI3LS4xNC0uMzRsLTEuMDYtLjM3Yy0uMjQtLjEtLjM4IDAtLjQ2LjJsLTMuMDUgNS4wNmMtLjEuMTYtLjA1LjIyLjA4LjMybDEuMS42Yy4yLjEuMzgtLjA0LjQ3LS4xOWwuMTEtLjFsLS4wNC0uMDQuMDYtLjA4ek04LjQ5IDEyLjc3Yy4zLS4wMy41LS4zNi40Ni0uNy0uMTMtMS4wNi0uNTQtMi42MS0uNC01LjQ0LjItNi40NiAzLjI0LTYuNCAxMC4yOS02LjgxbC44LS4wMmMuMTMgMCAuMjQtLjA2LjM0LS4xNmwuMzItLjM0YS41LjUgMCAwMC0uMzQtLjg1SDEuODVjLS4yNSAwLS40NS4yLS40NS40NGwuMDEuMmMwIC4xMy4wNy4yNi4xOS4zMmwuNzEuNDJjMS42LjkgMi4yMyAyLjI1IDIuNDMgMy4zMi4xMi43LjMgMS43OC41NCA0LjA0LjIgMS43OC4zMyAyLjgyLjQ1IDMuOC4wNy41OC4wOCAxLjAxLjE4IDEuNDYuMTEuNDQuMjQuODQuNDMgMS4yLjIyLjM4LjQ3LjY5LjkyLjkzLjQ1LjI0IDEgLjM2IDEuNzMuMzZoLjA3YzEuNzYgMCAyLjgtMS4zMSAyLjhWN2MwLTMuODMtNC4yMS01LjktNy4zNS01LjloLS4wMUwzLjUgMS4xOGMtLjM2LjA3LS41NC4zLS41NS41Ny0uMDIuMjcuMTQuNS40LjU3bC4yMy4wN2MxLjgxLjUzIDMuMTcgMi4wNSAzLjE3IDQuODF2Ni4xYzAgLjMtLjAyLjU2LS4wNC45LS4wMy4zMy4yMS42MS41Mi42NGwxLjE4LjFjLjA1LjAxLjA5LjAyLjA4LjAzeiIvPjwvc3ZnPg==');
+}
+
+.service-icon {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IiMzNDk4ZGIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTIwIDJINGMtMS4xIDAtMS45OS45LTEuOTkgMkwyIDIybDQtNGgxNGMxLjEgMCAyLS45IDItMlY0YzAtMS4xLS45LTItMi0yek02IDloMTJ2Mkg2Vjl6bTggNUg2di0yaDh2MnptNC02SDZ2LTJIMTJ2MnoiLz48L3N2Zz4=');
+}
+
+.feedback-icon {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IiMzNDk4ZGIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTIwIDJINGMtMS4xIDAtMS45OS45LTEuOTkgMkwyIDIybDQtNGgxNGMxLjEgMCAyLS45IDItMlY0YzAtMS4xLS45LTItMi0yek0xMyA0LjNsLTEuMTIgMi4yLTIuNTQuMzIgMS44NCAxLjgyLS40NSAyLjU2TDEzIDEwLjExbDIuMjcgMS4yMi0uNDUtMi41NkwxNi42NiA2Ljg2bC0yLjU0LS4zMUwxMyA0LjN6TTcgMTRoMTB2Mkg3di0yeiIvPjwvc3ZnPg==');
+}
+
+.about-icon {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IiMzNDk4ZGIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgMThjLTQuNDEgMC04LTMuNTktOC04czMuNTktOCA4LTggOCAzLjU5IDggOC0zLjU5IDgtOCA4ek0xMSA1aDJ2Nkg5djJoNnYyaC0ydjJoLTJ2LTJINXYtMmgxMVY5aC01eiIvPjwvc3ZnPg==');
+}
+
+.menu-text {
+  font-size: 30rpx;
+  color: #333;
+  flex: 1;
+}
+
+.menu-arrow {
+  width: 16rpx;
+  height: 16rpx;
+  border-top: 2rpx solid #bbb;
+  border-right: 2rpx solid #bbb;
+  transform: rotate(45deg);
+}
+
+.contact-btn {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+
+/* 退出登录按钮 */
+.logout-section {
+  padding: 40rpx 30rpx;
+}
+
+.logout-btn {
+  background-color: #fff;
+  color: #e74c3c;
+  border: 1rpx solid #e74c3c;
+  font-size: 32rpx;
+  height: 90rpx;
+  line-height: 90rpx;
+  border-radius: 45rpx;
+} 

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wordcheck.mapper.PointMapper">
+    
+    <!-- 用户积分信息结果映射 -->
+    <resultMap id="UserPointResult" type="com.wordcheck.model.UserPoint">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="points" column="points"/>
+        <result property="level" column="level"/>
+        <result property="cumulativePoints" column="cumulative_points"/>
+        <result property="totalEarnPoints" column="total_earn_points"/>
+        <result property="totalSpendPoints" column="total_spend_points"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+    
+    <!-- 积分记录结果映射 -->
+    <resultMap id="PointRecordResult" type="com.wordcheck.model.PointRecord">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="points" column="points"/>
+        <result property="reason" column="reason"/>
+        <result property="type" column="type"/>
+        <result property="action" column="action"/>
+        <result property="businessId" column="business_id"/>
+        <result property="businessType" column="business_type"/>
+        <result property="remark" column="remark"/>
+        <result property="beforePoints" column="before_points"/>
+        <result property="afterPoints" column="after_points"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 获取用户积分信息 -->
+    <select id="getUserPoints" resultMap="UserPointResult">
+        SELECT * FROM user_points WHERE user_id = #{userId}
+    </select>
+    
+    <!-- 初始化用户积分记录 -->
+    <insert id="initUserPoints" parameterType="com.wordcheck.model.UserPoint" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_points (
+            user_id, points, level, cumulative_points, 
+            total_earn_points, total_spend_points, created_at, updated_at
+        ) VALUES (
+            #{userId}, #{points}, #{level}, #{cumulativePoints}, 
+            #{totalEarnPoints}, #{totalSpendPoints}, NOW(), NOW()
+        )
+    </insert>
+    
+    <!-- 更新用户积分 -->
+    <update id="updateUserPoints" parameterType="com.wordcheck.model.UserPoint">
+        UPDATE user_points SET 
+            points = #{points},
+            cumulative_points = #{cumulativePoints},
+            total_earn_points = #{totalEarnPoints},
+            total_spend_points = #{totalSpendPoints},
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+    </update>
+    
+    <!-- 更新用户等级 -->
+    <update id="updateUserLevel">
+        UPDATE user_points SET 
+            level = #{level},
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+    </update>
+    
+    <!-- 添加积分记录 -->
+    <insert id="addPointRecord" parameterType="com.wordcheck.model.PointRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO point_records (
+            user_id, points, reason, type, action, business_id, business_type,
+            remark, before_points, after_points, created_at, updated_at
+        ) VALUES (
+            #{userId}, #{points}, #{reason}, #{type}, #{action}, #{businessId}, #{businessType},
+            #{remark}, #{beforePoints}, #{afterPoints}, NOW(), NOW()
+        )
+    </insert>
+    
+    <!-- 获取用户积分记录列表 -->
+    <select id="getPointRecords" resultMap="PointRecordResult">
+        SELECT * FROM point_records 
+        WHERE user_id = #{userId}
+        <if test="type != null and type != ''">
+            AND type = #{type}
+        </if>
+        ORDER BY created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+    
+    <!-- 获取用户积分记录总数 -->
+    <select id="countPointRecords" resultType="int">
+        SELECT COUNT(*) FROM point_records 
+        WHERE user_id = #{userId}
+        <if test="type != null and type != ''">
+            AND type = #{type}
+        </if>
+    </select>
+</mapper> 

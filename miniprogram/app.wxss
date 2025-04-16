@@ -1,0 +1,100 @@
+/**app.wxss**/
+page {
+  background-color: #f8f8f8;
+  font-size: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  color: #333;
+}
+
+.container {
+  padding: 20rpx;
+  box-sizing: border-box;
+}
+
+.header {
+  padding: 30rpx;
+  background: #3498db;
+  color: #fff;
+  margin-bottom: 20rpx;
+  border-radius: 0 0 16rpx 16rpx;
+}
+
+.btn-primary {
+  background-color: #3498db;
+  color: #fff;
+  border-radius: 8rpx;
+  margin: 20rpx 0;
+}
+
+.btn-default {
+  background-color: #f8f8f8;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 8rpx;
+  margin: 20rpx 0;
+}
+
+.card {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+}
+
+.form-item {
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #eee;
+}
+
+.form-label {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-primary {
+  color: #3498db;
+}
+
+.text-muted {
+  color: #999;
+  font-size: 26rpx;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-between {
+  justify-content: space-between;
+}
+
+.flex-center {
+  justify-content: center;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.bold {
+  font-weight: bold;
+} 

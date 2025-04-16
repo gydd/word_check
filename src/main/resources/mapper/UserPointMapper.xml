@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wordcheck.mapper.UserPointMapper">
+    <!-- 根据用户ID查询积分信息 -->
+    <select id="findByUserId" resultType="com.wordcheck.model.UserPoint">
+        SELECT * FROM user_points WHERE user_id = #{userId}
+    </select>
+    
+    <!-- 插入新的用户积分记录 -->
+    <insert id="insert" parameterType="com.wordcheck.model.UserPoint">
+        INSERT INTO user_points (
+            user_id, current_points, total_earned, total_spent, 
+            level, level_name, next_level_points, last_updated, 
+            created_at, updated_at
+        )
+        VALUES (
+            #{userId}, #{currentPoints}, #{totalEarned}, #{totalSpent}, 
+            #{level}, #{levelName}, #{nextLevelPoints}, NOW(), 
+            NOW(), NOW()
+        )
+    </insert>
+    
+    <!-- 更新用户积分信息 -->
+    <update id="update" parameterType="com.wordcheck.model.UserPoint">
+        UPDATE user_points
+        SET 
+            current_points = #{currentPoints},
+            total_earned = #{totalEarned},
+            total_spent = #{totalSpent},
+            level = #{level},
+            level_name = #{levelName},
+            next_level_points = #{nextLevelPoints},
+            last_updated = NOW(),
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+    </update>
+    
+    <!-- 增加用户积分 -->
+    <update id="addPoints">
+        UPDATE user_points
+        SET 
+            current_points = current_points + #{points},
+            total_earned = total_earned + #{points},
+            last_updated = NOW(),
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+    </update>
+    
+    <!-- 减少用户积分 -->
+    <update id="deductPoints">
+        UPDATE user_points
+        SET 
+            current_points = current_points - #{points},
+            total_spent = total_spent + #{points},
+            last_updated = NOW(),
+            updated_at = NOW()
+        WHERE user_id = #{userId} AND current_points >= #{points}
+    </update>
+</mapper> 

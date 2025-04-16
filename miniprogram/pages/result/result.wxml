@@ -1,0 +1,85 @@
+<!-- result.wxml -->
+<view class="container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="title">检测结果</view>
+    <view class="subtitle">文档ID: {{resultId}}</view>
+  </view>
+
+  <!-- 加载中提示 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-icon">
+      <image src="/static/images/loading.gif" mode="aspectFit"></image>
+    </view>
+    <view class="loading-text">正在获取检测结果...</view>
+  </view>
+
+  <!-- 检测结果 -->
+  <view class="result-container" wx:else>
+    <!-- 错误提示 -->
+    <view class="error-container" wx:if="{{hasError}}">
+      <view class="error-icon">
+        <text class="iconfont icon-error"></text>
+      </view>
+      <view class="error-message">{{errorMsg}}</view>
+      <button class="retry-button" bindtap="loadResult">重试</button>
+    </view>
+
+    <!-- 检测结果内容 -->
+    <block wx:else>
+      <!-- 检测摘要 -->
+      <view class="result-summary">
+        <view class="summary-item">
+          <view class="summary-label">检测类型</view>
+          <view class="summary-value">{{result.checkType || '文本检测'}}</view>
+        </view>
+        <view class="summary-item">
+          <view class="summary-label">检测时间</view>
+          <view class="summary-value">{{result.checkTime || '-'}}</view>
+        </view>
+        <view class="summary-item">
+          <view class="summary-label">文本长度</view>
+          <view class="summary-value">{{result.textLength || 0}} 字符</view>
+        </view>
+        <view class="summary-item">
+          <view class="summary-label">检测结果</view>
+          <view class="summary-value {{result.status === 'PASSED' ? 'pass' : 'fail'}}">
+            {{result.status === 'PASSED' ? '通过' : '未通过'}}
+          </view>
+        </view>
+      </view>
+
+      <!-- 详细结果 -->
+      <view class="result-details">
+        <view class="section-title">详细结果</view>
+        
+        <view class="no-issues" wx:if="{{result.issues.length === 0}}">
+          <text class="iconfont icon-success"></text>
+          <text>恭喜！未发现任何问题</text>
+        </view>
+        
+        <view class="issues-list" wx:else>
+          <view class="issue-item" wx:for="{{result.issues}}" wx:key="index">
+            <view class="issue-header">
+              <view class="issue-type {{item.severity}}">{{item.type}}</view>
+              <view class="issue-location">位置: {{item.location}}</view>
+            </view>
+            <view class="issue-content">
+              <view class="issue-text">{{item.text}}</view>
+              <view class="issue-suggestion" wx:if="{{item.suggestion}}">
+                <text class="suggestion-label">建议：</text>
+                <text>{{item.suggestion}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="action-buttons">
+        <button class="action-button share-button" bindtap="shareResult">分享结果</button>
+        <button class="action-button return-button" bindtap="returnToUpload">返回检测</button>
+      </view>
+    </block>
+  </view>
+</view> 

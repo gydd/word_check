@@ -1,0 +1,91 @@
+<!-- upload.wxml -->
+<view class="container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <view class="title">文本检测</view>
+    <view class="subtitle">剩余积分: {{userPoints}} 分</view>
+    <view class="check-cost">本次检测消耗: {{checkCost}} 分</view>
+  </view>
+
+  <!-- 选项卡 -->
+  <view class="tabs">
+    <view class="tab {{currentTab === 'text' ? 'active' : ''}}" 
+          bindtap="switchTab" 
+          data-tab="text">
+      <view class="tab-icon">
+        <text class="iconfont icon-text"></text>
+      </view>
+      <view class="tab-text">文本检测</view>
+    </view>
+    <view class="tab {{currentTab === 'file' ? 'active' : ''}}" 
+          bindtap="switchTab" 
+          data-tab="file">
+      <view class="tab-icon">
+        <text class="iconfont icon-file"></text>
+      </view>
+      <view class="tab-text">文件检测</view>
+    </view>
+  </view>
+
+  <!-- 内容区域 -->
+  <view class="content">
+    <!-- 文本检测内容 -->
+    <view class="text-content" wx:if="{{currentTab === 'text'}}">
+      <view class="text-input-area">
+        <textarea 
+          class="text-input" 
+          placeholder="请输入需要检测的文本内容..."
+          placeholder-class="placeholder"
+          bindinput="handleTextInput"
+          value="{{textInput}}"
+          maxlength="10000"
+          auto-height="{{true}}"
+        ></textarea>
+        <view class="text-counter">{{textInputLength}}/10000</view>
+      </view>
+      <view class="text-tips">
+        <text>提示：请输入您需要检测的文本，最多支持10000字符</text>
+      </view>
+    </view>
+
+    <!-- 文件检测内容 -->
+    <view class="file-content" wx:else>
+      <view class="file-upload-area" wx:if="{{!hasUploadedFile}}">
+        <view class="upload-button" bindtap="chooseFile">
+          <view class="upload-icon">
+            <text class="iconfont icon-upload"></text>
+          </view>
+          <view class="upload-text">点击上传文件</view>
+          <view class="upload-description">支持的格式：doc, docx, txt, pdf（不超过5MB）</view>
+        </view>
+      </view>
+
+      <view class="file-info" wx:else>
+        <view class="file-icon">
+          <text class="iconfont icon-{{fileInfo.type}}"></text>
+        </view>
+        <view class="file-details">
+          <view class="file-name">{{fileInfo.name}}</view>
+          <view class="file-size">{{fileInfo.size}}</view>
+        </view>
+        <view class="file-actions">
+          <view class="file-action" bindtap="reselectFile">重选</view>
+          <view class="file-action file-delete" bindtap="deleteFile">删除</view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 提交按钮 -->
+    <view class="action-area">
+      <button 
+        class="submit-button {{canSubmit() ? '' : 'disabled'}}" 
+        bindtap="submitCheck"
+        disabled="{{isSubmitting || !canSubmit()}}">
+        {{isSubmitting ? '检测中...' : '开始检测'}}
+      </button>
+      <view class="action-tips" wx:if="{{userPoints < checkCost}}">
+        <text class="error-text">积分不足，请先充值</text>
+      </view>
+    </view>
+  </view>
+</view> 

@@ -1,0 +1,92 @@
+<!-- 积分页面 -->
+<view class="points-container">
+  <!-- 积分概览卡片 -->
+  <view class="points-overview-card">
+    <view class="points-info">
+      <view class="current-points-label">当前积分</view>
+      <view class="current-points-value">{{pointsInfo.currentPoints || 0}}</view>
+      <view class="points-level">
+        <view class="level-label">{{pointsInfo.levelName || '初学者'}}</view>
+        <view class="progress-bar">
+          <view class="progress-inner" style="width: {{(pointsInfo.currentPoints / pointsInfo.nextLevelPoints) * 100}}%;"></view>
+        </view>
+        <view class="level-info">距离下一等级还需 <text class="highlight">{{pointsInfo.nextLevelPoints - pointsInfo.currentPoints || 0}}</text> 积分</view>
+      </view>
+    </view>
+    <view class="points-statistics">
+      <view class="statistics-item">
+        <view class="statistics-value">{{pointsInfo.totalEarned || 0}}</view>
+        <view class="statistics-label">总获得</view>
+      </view>
+      <view class="statistics-item">
+        <view class="statistics-value">{{pointsInfo.totalSpent || 0}}</view>
+        <view class="statistics-label">总消费</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 积分获取方式 -->
+  <view class="points-section">
+    <view class="section-title">积分获取方式</view>
+    <view class="points-ways">
+      <view class="points-way-item" bindtap="goToSignIn">
+        <view class="way-icon sign-in-icon"></view>
+        <view class="way-info">
+          <view class="way-title">每日签到</view>
+          <view class="way-desc">每日签到可得5积分，连续签到奖励更多</view>
+        </view>
+        <view class="way-action">去签到</view>
+      </view>
+      <view class="points-way-item" bindtap="goToWordCheck">
+        <view class="way-icon check-icon"></view>
+        <view class="way-info">
+          <view class="way-title">单词检查</view>
+          <view class="way-desc">拼写正确获得积分奖励</view>
+        </view>
+        <view class="way-action">去检查</view>
+      </view>
+      <view class="points-way-item" bindtap="goToRecharge">
+        <view class="way-icon recharge-icon"></view>
+        <view class="way-info">
+          <view class="way-title">积分充值</view>
+          <view class="way-desc">快速充值积分用于作文批改</view>
+        </view>
+        <view class="way-action">去充值</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 积分记录标签页 -->
+  <view class="points-records-section">
+    <view class="tabs">
+      <view class="tab {{activeTab === 'all' ? 'active' : ''}}" data-tab="all" bindtap="switchTab">全部</view>
+      <view class="tab {{activeTab === 'earn' ? 'active' : ''}}" data-tab="earn" bindtap="switchTab">获得</view>
+      <view class="tab {{activeTab === 'spend' ? 'active' : ''}}" data-tab="spend" bindtap="switchTab">消费</view>
+    </view>
+    
+    <!-- 积分记录列表 -->
+    <view class="records-list" wx:if="{{records.length > 0}}">
+      <view class="record-item" wx:for="{{records}}" wx:key="id">
+        <view class="record-info">
+          <view class="record-reason">{{item.reason}}</view>
+          <view class="record-time">{{item.createdAt}}</view>
+        </view>
+        <view class="record-points {{item.action === 'add' ? 'earn' : 'spend'}}">
+          {{item.action === 'add' ? '+' : '-'}}{{item.points}}
+        </view>
+      </view>
+      
+      <!-- 加载更多 -->
+      <view class="load-more" wx:if="{{hasMoreRecords}}">
+        <view class="loading" wx:if="{{isLoading}}">加载中...</view>
+        <view class="load-more-btn" wx:else bindtap="loadMoreRecords">加载更多</view>
+      </view>
+    </view>
+    
+    <!-- 无记录提示 -->
+    <view class="empty-records" wx:else>
+      <image class="empty-icon" src="/static/images/empty.png"></image>
+      <view class="empty-text">暂无积分记录</view>
+    </view>
+  </view>
+</view> 

@@ -1,0 +1,24 @@
+<!-- 登录页面 -->
+<view class="login-container">
+  <view class="logo-section">
+    <image class="logo" src="/static/images/logo.png" mode="aspectFit"></image>
+    <view class="app-title">单词检查</view>
+  </view>
+  
+  <view class="login-form">
+    <view class="welcome-text">欢迎使用单词检查小程序</view>
+    <view class="desc-text">登录后体验更多功能</view>
+    
+    <button class="login-btn" open-type="getUserInfo" bindgetuserinfo="onGetUserInfo">
+      微信一键登录
+    </button>
+    
+    <button class="login-btn phone-login" open-type="getPhoneNumber" bindgetphonenumber="onGetPhoneNumber">
+      手机号登录
+    </button>
+  </view>
+  
+  <view class="policy-text">
+    登录即表示同意《用户协议》和《隐私政策》
+  </view>
+</view> 
