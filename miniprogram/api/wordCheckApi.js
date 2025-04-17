@@ -249,7 +249,7 @@ function uploadAndCheck(params) {
               app.clearLoginInfo();
               const error = { type: ERROR_TYPES.TOKEN_EXPIRED, message: '登录已过期，请重新登录' };
               
-        wx.showToast({
+              wx.showToast({
                 title: error.message,
                 icon: 'none',
                 duration: 2000
@@ -311,6 +311,128 @@ function uploadAndCheck(params) {
 }
 
 /**
+ * 上传文件并进行检查 - 为upload.js页面提供的接口
+ * @param {Object} params 上传参数
+ * @param {String} params.filePath 文件路径
+ * @param {String} params.fileName 文件名称
+ * @param {Function} params.onProgress 进度回调函数（可选）
+ * @returns {Promise} 返回检查结果的Promise
+ */
+function uploadFileCheck(params) {
+  console.log('[wordCheckApi] 开始上传文件检查, 参数:', params);
+  
+  // 参数验证
+  if (!params || !params.filePath) {
+    return Promise.reject({ 
+      type: ERROR_TYPES.PARAM_ERROR, 
+      message: '文件路径不能为空' 
+    });
+  }
+  
+  // 确保有文件名
+  if (!params.fileName && params.filePath) {
+    const pathParts = params.filePath.split('/');
+    params.fileName = pathParts[pathParts.length - 1];
+  }
+  
+  return new Promise((resolve, reject) => {
+    const uploadTask = wx.uploadFile({
+      url: app.globalData.baseUrl + '/api/v1/word/upload',
+      filePath: params.filePath,
+      name: 'file',
+      formData: {
+        fileName: params.fileName
+      },
+      header: {
+        'Authorization': getAuthHeader()
+      },
+      success: function(res) {
+        console.log('[wordCheckApi] 文件上传响应:', res);
+        try {
+          // 微信小程序uploadFile返回的数据是字符串，需要解析为JSON
+          const data = JSON.parse(res.data);
+          if (data.code === 200) {
+            // 上传成功，直接返回结果，不再调用getCheckResult
+            console.log('[wordCheckApi] 文件上传成功:', data.data);
+            resolve({
+              resultId: data.data.taskId,
+              status: 'success',
+              message: '文件上传成功'
+            });
+          } else if (data.code === 401) {
+            // Token失效
+            app.clearLoginInfo();
+            const error = { type: ERROR_TYPES.TOKEN_EXPIRED, message: '登录已过期，请重新登录' };
+            
+            wx.showToast({
+              title: error.message,
+              icon: 'none'
+            });
+            
+            setTimeout(() => {
+              wx.navigateTo({
+                url: '/pages/login/login'
+              });
+            }, 1500);
+            
+            reject(error);
+          } else if (data.code === 4001) {
+            // 积分不足
+            const error = { type: ERROR_TYPES.POINTS_NOT_ENOUGH, message: '积分不足，请先充值' };
+            
+            wx.showToast({
+              title: error.message,
+              icon: 'none'
+            });
+            
+            reject(error);
+          } else {
+            // 其他业务错误
+            const errMsg = data.message || '上传失败';
+            const error = { type: ERROR_TYPES.UNKNOWN_ERROR, message: errMsg, code: data.code };
+            
+            wx.showToast({
+              title: errMsg,
+              icon: 'none'
+            });
+            
+            reject(error);
+          }
+        } catch (e) {
+          console.error('[wordCheckApi] 解析上传响应失败:', e);
+          reject({ type: ERROR_TYPES.SERVER_ERROR, message: '服务器响应格式错误', originalError: e });
+        }
+      },
+      fail: function(err) {
+        console.error('[wordCheckApi] 文件上传请求失败:', err);
+        
+        let errorType = ERROR_TYPES.NETWORK_ERROR;
+        let errorMsg = '网络连接失败';
+        
+        if (err.errMsg && err.errMsg.includes('timeout')) {
+          errorType = ERROR_TYPES.TIMEOUT_ERROR;
+          errorMsg = '上传超时，请检查网络';
+        }
+        
+        wx.showToast({
+          title: errorMsg,
+          icon: 'none'
+        });
+        
+        reject({ type: errorType, message: errorMsg, originalError: err });
+      }
+    });
+    
+    // 注册上传进度事件
+    if (typeof params.onProgress === 'function') {
+      uploadTask.onProgressUpdate((res) => {
+        params.onProgress(res.progress);
+      });
+    }
+  });
+}
+
+/**
  * 获取检查结果
  * @param {String} taskId 任务ID
  * @returns {Promise} 返回检查结果的Promise
@@ -367,86 +489,128 @@ function getCheckResult(taskId) {
 
 /**
  * 获取用户积分
+ * @param {Object} options 选项
+ * @param {Boolean} options.silentFail 是否静默失败（不显示错误提示）
  * @returns {Promise} 返回用户积分信息的Promise
  */
-function getUserPoints() {
-  const requestFn = () => {
-    return new Promise((resolve, reject) => {
-      const token = wx.getStorageSync('token');
-      
-      if (!token) {
-        reject({ type: ERROR_TYPES.AUTH_ERROR, message: '未登录' });
-        return;
-      }
-      
-      // 尝试请求新路径
-      const tryNewPath = () => {
-        const requestTask = wx.request({
-          url: app.globalData.baseUrl + '/api/v1/points',
-          method: 'GET',
-          header: {
-            'Authorization': getAuthHeader()
-          },
-          success: function(res) {
-            if (res.statusCode === 404) {
-              // 如果新路径返回404，尝试旧路径
-              console.log('新路径API不存在，尝试旧路径');
+function getUserPoints(options = {}) {
+  const silentFail = options.silentFail || false;
+  
+  // 设置一个标志避免路径尝试重复执行
+  let apiPathAttempted = false;
+  
+  // 不使用重试机制，直接返回单次请求的Promise
+  return new Promise((resolve, reject) => {
+    const token = wx.getStorageSync('token');
+    
+    if (!token) {
+      reject({ type: ERROR_TYPES.AUTH_ERROR, message: '未登录' });
+      return;
+    }
+    
+    // 尝试请求新路径
+    const tryNewPath = () => {
+      const requestTask = wx.request({
+        url: app.globalData.baseUrl + '/api/v1/points',
+        method: 'GET',
+        header: {
+          'Authorization': getAuthHeader()
+        },
+        success: function(res) {
+          if (res.statusCode === 404) {
+            // 如果新路径返回404，尝试旧路径
+            console.log('新路径API不存在，尝试旧路径');
+            if (!apiPathAttempted) {
+              apiPathAttempted = true;
               tryOldPath();
             } else {
-              handleApiResponse(res, resolve, reject);
+              // 避免无限循环
+              handleApiFailure({ statusCode: 404, message: '积分API不存在' });
             }
-          },
-          fail: function(err) {
-            console.error('获取积分信息请求失败 (新路径):', err);
-            // 尝试旧路径
-            tryOldPath();
-          }
-        });
-        
-        // 设置超时
-        setTimeout(() => {
-          requestTask.abort();
-        }, REQUEST_TIMEOUT);
-      };
-      
-      // 尝试请求旧路径
-      const tryOldPath = () => {
-        const requestTask = wx.request({
-          url: app.globalData.baseUrl + '/api/v1/point/info',
-          method: 'GET',
-          header: {
-            'Authorization': getAuthHeader()
-          },
-          success: function(res) {
+          } else {
             handleApiResponse(res, resolve, reject);
-          },
-          fail: function(err) {
-            console.error('获取积分信息请求失败 (旧路径):', err);
-            
-            let errorType = ERROR_TYPES.NETWORK_ERROR;
-            let errorMsg = '网络连接失败';
-            
-            if (err.errMsg && err.errMsg.includes('timeout')) {
-              errorType = ERROR_TYPES.TIMEOUT_ERROR;
-              errorMsg = '请求超时，请检查网络';
-            }
-            
-            reject({ type: errorType, message: errorMsg, originalError: err });
           }
-        });
-        
-        // 设置超时
-        setTimeout(() => {
-          requestTask.abort();
-        }, REQUEST_TIMEOUT);
-      };
+        },
+        fail: function(err) {
+          console.error('获取积分信息请求失败 (新路径):', err);
+          // 尝试旧路径
+          if (!apiPathAttempted) {
+            apiPathAttempted = true;
+            tryOldPath();
+          } else {
+            // 避免无限循环
+            handleApiFailure(err);
+          }
+        }
+      });
       
-      // 先尝试新路径
-      tryNewPath();
-    });
-  };
-  
-  return executeWithRetry(requestFn);
+      // 设置超时
+      setTimeout(() => {
+        requestTask.abort();
+      }, REQUEST_TIMEOUT);
+    };
+    
+    // 尝试请求旧路径
+    const tryOldPath = () => {
+      const requestTask = wx.request({
+        url: app.globalData.baseUrl + '/api/v1/point/info',
+        method: 'GET',
+        header: {
+          'Authorization': getAuthHeader()
+        },
+        success: function(res) {
+          if (res.statusCode === 404) {
+            handleApiFailure({ statusCode: 404, message: '积分API不存在' });
+          } else {
+            handleApiResponse(res, resolve, reject);
+          }
+        },
+        fail: function(err) {
+          console.error('获取积分信息请求失败 (旧路径):', err);
+          handleApiFailure(err);
+        }
+      });
+      
+      // 设置超时
+      setTimeout(() => {
+        requestTask.abort();
+      }, REQUEST_TIMEOUT);
+    };
+    
+    // 统一处理失败
+    const handleApiFailure = (err) => {
+      let errorType = ERROR_TYPES.NETWORK_ERROR;
+      let errorMsg = '网络连接失败';
+      let statusCode = err.statusCode || 0;
+      
+      if (err.errMsg && err.errMsg.includes('timeout')) {
+        errorType = ERROR_TYPES.TIMEOUT_ERROR;
+        errorMsg = '请求超时，请检查网络';
+      } else if (statusCode === 404) {
+        errorType = ERROR_TYPES.SERVER_ERROR;
+        errorMsg = '请求的资源不存在';
+      }
+      
+      // 如果是静默失败模式，不显示提示
+      if (!silentFail) {
+        wx.showToast({
+          title: errorMsg,
+          icon: 'none',
+          duration: 2000
+        });
+      }
+      
+      reject({ 
+        type: errorType, 
+        message: errorMsg, 
+        originalError: err,
+        statusCode: statusCode
+      });
+    };
+    
+    // 先尝试新路径
+    tryNewPath();
+  });
 }
 
 /**
@@ -686,6 +850,7 @@ module.exports = {
   ERROR_TYPES,
   checkWord,
   uploadAndCheck,
+  uploadFileCheck,
   getCheckResult,
   getUserPoints,
   getCheckHistory,

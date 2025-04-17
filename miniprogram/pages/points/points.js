@@ -3,6 +3,11 @@ const app = getApp()
 const pointApi = require('../../api/pointApi')
 const signInApi = require('../../api/signInApi')
 
+// 检查pointApi是否正确导入
+console.log('[points.js] pointApi导入检查:', pointApi);
+console.log('[points.js] getUserPoints函数检查:', typeof pointApi.getUserPoints);
+console.log('[points.js] getPointsRecords函数检查:', typeof pointApi.getPointsRecords);
+
 Page({
   /**
    * 页面的初始数据
@@ -54,10 +59,12 @@ Page({
    * 获取用户积分信息
    */
   getPointsInfo: function () {
+    console.log('[points.js] 开始获取积分信息');
     return pointApi.getUserPoints().then(res => {
+      console.log('[points.js] 积分获取成功:', res);
       this.setData({ pointsInfo: res })
     }).catch(err => {
-      console.error('获取积分信息失败:', err)
+      console.error('[points.js] 获取积分信息失败:', err)
       wx.showToast({
         title: '获取积分信息失败',
         icon: 'none'
@@ -74,12 +81,14 @@ Page({
     if (this.data.isLoading) return Promise.resolve()
     
     this.setData({ isLoading: true })
+    console.log('[points.js] 开始获取积分记录, 参数:', { page, pageSize, type: activeTab });
     
     return pointApi.getPointsRecords({
       page: page,
       pageSize: pageSize,
       type: activeTab
     }).then(res => {
+      console.log('[points.js] 积分记录获取成功:', res);
       // 合并记录
       const newRecords = page === 1 ? res.records : [...records, ...res.records]
       
@@ -89,7 +98,7 @@ Page({
         page: page + 1
       })
     }).catch(err => {
-      console.error('获取积分记录失败:', err)
+      console.error('[points.js] 获取积分记录失败:', err)
       wx.showToast({
         title: '获取积分记录失败',
         icon: 'none'

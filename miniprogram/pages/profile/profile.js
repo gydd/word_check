@@ -3,6 +3,10 @@ const app = getApp()
 const userApi = require('../../api/userApi')
 const pointApi = require('../../api/pointApi')
 
+// 检查pointApi是否正确导入
+console.log('[profile.js] pointApi导入检查:', pointApi);
+console.log('[profile.js] getUserPoints函数检查:', typeof pointApi.getUserPoints);
+
 Page({
   /**
    * 页面的初始数据

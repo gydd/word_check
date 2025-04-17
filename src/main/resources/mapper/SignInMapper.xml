@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wordcheck.mapper.SignInMapper">
+    
+    <!-- 结果映射 -->
+    <resultMap id="SignInResult" type="com.wordcheck.model.SignIn">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="continuousDays" column="continuous_days"/>
+        <result property="points" column="points"/>
+        <result property="signDate" column="sign_date"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+    
+    <!-- 根据用户ID和日期查询签到记录 -->
+    <select id="findByUserIdAndDate" resultMap="SignInResult">
+        SELECT * FROM sign_in 
+        WHERE user_id = #{userId} AND sign_date = #{date}
+    </select>
+    
+    <!-- 根据用户ID查询最近一次签到记录 -->
+    <select id="findLastByUserId" resultMap="SignInResult">
+        SELECT * FROM sign_in 
+        WHERE user_id = #{userId} 
+        ORDER BY sign_date DESC 
+        LIMIT 1
+    </select>
+    
+    <!-- 插入新的签到记录 -->
+    <insert id="insert" parameterType="com.wordcheck.model.SignIn" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sign_in (
+            user_id, continuous_days, points, sign_date, created_at, updated_at
+        ) VALUES (
+            #{userId}, #{continuousDays}, #{points}, #{signDate}, NOW(), NOW()
+        )
+    </insert>
+    
+    <!-- 获取用户在指定月份的签到记录 -->
+    <select id="findByUserIdAndMonth" resultMap="SignInResult">
+        SELECT * FROM sign_in 
+        WHERE user_id = #{userId} 
+        AND YEAR(sign_date) = #{year} 
+        AND MONTH(sign_date) = #{month}
+        ORDER BY sign_date ASC
+    </select>
+    
+    <!-- 获取用户签到总天数 -->
+    <select id="countByUserId" resultType="int">
+        SELECT COUNT(*) FROM sign_in 
+        WHERE user_id = #{userId}
+    </select>
+    
+    <!-- 获取用户最近一周的签到记录 -->
+    <select id="findByUserIdAndDateRange" resultMap="SignInResult">
+        SELECT * FROM sign_in 
+        WHERE user_id = #{userId} 
+        AND sign_date BETWEEN #{startDate} AND #{endDate}
+        ORDER BY sign_date ASC
+    </select>
+</mapper> 

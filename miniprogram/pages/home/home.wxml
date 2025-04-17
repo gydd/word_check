@@ -1,58 +1,96 @@
 <view class="container">
-  <!-- 加载中 -->
+  <!-- 加载中样式 -->
   <view class="loading" wx:if="{{loading}}">
     <view class="loading-icon"></view>
   </view>
 
-  <!-- 头部用户信息 -->
-  <view class="header" wx:if="{{userInfo}}">
+  <!-- 用户信息 -->
+  <view class="header">
     <view class="user-info">
       <image class="avatar" src="{{userInfo.avatarUrl || '/static/images/default-avatar.png'}}"></image>
       <view class="user-detail">
-        <view class="nickname">{{userInfo.nickname || '未设置昵称'}}</view>
-        <view class="user-level">Lv.{{userInfo.level}} {{userInfo.levelName}}</view>
+        <text class="nickname">{{userInfo.nickname || '未登录'}}</text>
+        <text class="user-level">普通用户</text>
       </view>
     </view>
     <view class="points-info">
-      <view class="points-value">{{userInfo.points}}</view>
-      <view class="points-label">我的积分</view>
+      <view class="points-value">{{userInfo.points || 0}}</view>
+      <view class="points-label">积分</view>
     </view>
   </view>
 
-  <!-- 签到区域 -->
+  <!-- 签到模块 -->
   <view class="sign-in-section">
     <view class="sign-in-title">每日签到</view>
-    <view class="sign-in-days" wx:if="{{signInStatus}}">
-      <view class="sign-in-text">已连续签到 {{signInStatus.continuousDays}} 天</view>
-      <view class="sign-in-total">累计签到 {{signInStatus.totalSignDays}} 天</view>
-    </view>
-    <button class="sign-in-btn {{signInStatus.todaySigned ? 'signed' : ''}}" bindtap="handleSignIn">
-      {{signInStatus.todaySigned ? '已签到' : '签到'}}
-    </button>
+    
+    <block wx:if="{{loadingSignIn}}">
+      <view class="sign-in-loading">
+        <view class="loading-dots">
+          <view class="loading-dot"></view>
+          <view class="loading-dot"></view>
+          <view class="loading-dot"></view>
+        </view>
+      </view>
+    </block>
+    <block wx:elif="{{signInStatus}}">
+      <view class="sign-in-days">
+        <view class="sign-in-text">已连续签到 {{signInStatus.continuousDays || 0}} 天</view>
+        <view class="sign-in-total">累计签到 {{signInStatus.totalSignDays || 0}} 天</view>
+      </view>
+      <view class="sign-in-btn {{signInStatus.todaySigned ? 'signed' : ''}}" bindtap="handleSignIn">
+        {{signInStatus.todaySigned ? '已签到' : '签到'}}
+      </view>
+    </block>
+    <block wx:else>
+      <view class="sign-in-error">
+        <text>获取签到信息失败</text>
+        <view class="refresh-btn" bindtap="loadSignInStatus">刷新</view>
+      </view>
+    </block>
   </view>
 
   <!-- 轮播图 -->
-  <swiper class="banner" indicator-dots="true" autoplay="true" interval="3000" duration="500">
-    <block wx:for="{{carouselImages}}" wx:key="*this">
-      <swiper-item>
-        <image src="{{item}}" class="banner-image" mode="aspectFill"></image>
-      </swiper-item>
+  <view class="banner-section">
+    <block wx:if="{{carouselLoading}}">
+      <view class="carousel-loading">
+        <view class="loading-icon"></view>
+        <text>加载中...</text>
+      </view>
     </block>
-  </swiper>
+    <block wx:elif="{{carouselError}}">
+      <view class="carousel-error" bindtap="loadCarouselData">
+        <icon type="warn" size="40"></icon>
+        <text>加载失败，点击重试</text>
+      </view>
+    </block>
+    <block wx:elif="{{carouselItems.length > 0}}">
+      <swiper class="banner" indicator-dots="{{true}}" autoplay="{{true}}" interval="3000" duration="500" circular="{{true}}">
+        <swiper-item wx:for="{{carouselItems}}" wx:key="id" bindtap="handleCarouselItemClick" data-index="{{index}}">
+          <image src="{{item.imageUrl}}" mode="aspectFill" class="banner-image" binderror="handleImageError" data-index="{{index}}"></image>
+          <view class="banner-title" wx:if="{{item.title}}">{{item.title}}</view>
+        </swiper-item>
+      </swiper>
+    </block>
+    <block wx:else>
+      <view class="carousel-empty">
+        <text>暂无轮播图</text>
+      </view>
+    </block>
+  </view>
 
   <!-- 功能区域 -->
   <view class="features">
-    <view class="feature-title">功能导航</view>
+    <view class="feature-title">功能服务</view>
     <view class="feature-grid">
       <view class="feature-item" wx:for="{{features}}" wx:key="id" bindtap="navigateToFeature" data-url="{{item.url}}">
         <image class="feature-icon" src="{{item.icon}}"></image>
-        <view class="feature-name">{{item.name}}</view>
+        <text class="feature-name">{{item.name}}</text>
       </view>
     </view>
   </view>
 
-  <!-- 底部说明 -->
+  <!-- 底部 -->
   <view class="footer">
-    <view class="footer-text">每日使用，提升英语水平</view>
+    <text class="footer-text">每天使用单词检查，英语能力稳步提升</text>
   </view>
 </view> 

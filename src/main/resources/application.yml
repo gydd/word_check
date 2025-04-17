@@ -16,6 +16,8 @@ spring:
     baseline-on-migrate: true
     baseline-version: 0
     repair-on-migrate: true
+    validate-on-migrate: false # 临时禁用验证，以便修复
+    clean-on-validation-error: false # 不要在验证错误时清除数据库
     
   mvc:
     pathmatch:

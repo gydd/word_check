@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
  * 积分控制器
  */
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/points")
 @Tag(name = "积分", description = "用户积分相关接口")
 @Slf4j
 public class PointController {
@@ -31,7 +31,7 @@ public class PointController {
      * @param request HTTP请求
      * @return 用户积分信息
      */
-    @GetMapping("/points")
+    @GetMapping("")
     @Operation(summary = "获取用户积分信息")
     public ApiResponse<PointsDTO> getUserPoints(HttpServletRequest request) {
         try {
@@ -58,7 +58,7 @@ public class PointController {
      * @param type 记录类型，可选值：all-全部，earn-获取，spend-消费
      * @return 积分记录
      */
-    @GetMapping("/points/records")
+    @GetMapping("/records")
     @Operation(summary = "获取用户积分记录")
     public ApiResponse<PointsRecordDTO> getPointsRecords(
             HttpServletRequest request,

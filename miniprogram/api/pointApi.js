@@ -9,20 +9,32 @@ const app = getApp();
  */
 function handleApiResponse(res, resolve, reject) {
   if (res.statusCode !== 200) {
+    const errorMsg = `HTTP错误: ${res.statusCode}`;
+    console.error('API请求状态码错误:', res.statusCode, res);
+    
     wx.showToast({
-      title: '网络请求失败',
+      title: errorMsg,
       icon: 'none'
     });
-    reject(new Error('网络请求失败'));
+    reject(new Error(errorMsg));
     return;
   }
 
   const data = res.data;
-  if (data.code === 200) {
+  
+  // 打印完整的响应数据，以便调试
+  console.log('API响应数据:', data);
+  
+  // 检查响应格式:
+  // 1. 后端使用 error=0 表示成功
+  // 2. 后端使用 error=401 表示认证失败
+  // 3. 其他错误码表示业务错误
+  if (data.error === 0) {
     // 请求成功
-    resolve(data.data);
-  } else if (data.code === 401) {
+    resolve(data.body);
+  } else if (data.error === 401) {
     // 需要登录
+    console.error('授权失败:', data);
     app.clearLoginInfo();
     wx.navigateTo({
       url: '/pages/login/login'
@@ -30,12 +42,29 @@ function handleApiResponse(res, resolve, reject) {
     reject(new Error('登录已过期，请重新登录'));
   } else {
     // 业务错误
+    const errMsg = data.message || '请求失败';
+    console.error('业务错误:', data);
+    
     wx.showToast({
-      title: data.message || '请求失败',
+      title: errMsg,
       icon: 'none'
     });
-    reject(new Error(data.message || '请求失败'));
+    reject(new Error(errMsg));
   }
+}
+
+/**
+ * 获取认证头
+ * @returns {String} 认证头
+ */
+function getAuthHeader() {
+  const token = wx.getStorageSync('token') || app.globalData.token;
+  console.log('当前Token:', token);
+  
+  if (token && !token.startsWith('Bearer ')) {
+    return 'Bearer ' + token;
+  }
+  return token;
 }
 
 /**
@@ -43,17 +72,33 @@ function handleApiResponse(res, resolve, reject) {
  * @returns {Promise} 返回用户积分信息的Promise
  */
 function getUserPoints() {
+  console.log('[pointApi] getUserPoints 函数被调用');
+  
   return new Promise((resolve, reject) => {
+    // 检查token是否存在
+    const authHeader = getAuthHeader();
+    if (!authHeader) {
+      console.error('获取积分信息失败: 未登录或Token不存在');
+      reject(new Error('未登录或Token不存在'));
+      return;
+    }
+    
+    const url = app.globalData.baseUrl + '/api/v1/points';
+    console.log('请求URL:', url);
+    console.log('请求头:', { 'Authorization': authHeader });
+    
     wx.request({
-      url: app.globalData.baseUrl + '/api/v1/points',
+      url: url,
       method: 'GET',
       header: {
-        'Authorization': app.globalData.token
+        'Authorization': authHeader
       },
       success: (res) => {
+        console.log('获取积分API响应:', res);
         handleApiResponse(res, resolve, reject);
       },
       fail: (err) => {
+        console.error('获取积分网络请求失败:', err);
         wx.showToast({
           title: '网络连接失败',
           icon: 'none'
@@ -73,6 +118,8 @@ function getUserPoints() {
  * @returns {Promise} 返回积分记录的Promise
  */
 function getPointsRecords(params = {}) {
+  console.log('[pointApi] getPointsRecords 函数被调用', params);
+  
   const page = params.page || 1;
   const pageSize = params.pageSize || 10;
   const type = params.type || 'all';
@@ -87,7 +134,7 @@ function getPointsRecords(params = {}) {
         type
       },
       header: {
-        'Authorization': app.globalData.token
+        'Authorization': getAuthHeader()
       },
       success: (res) => {
         handleApiResponse(res, resolve, reject);
@@ -103,7 +150,14 @@ function getPointsRecords(params = {}) {
   });
 }
 
-module.exports = {
+// 创建并导出API对象
+const pointApi = {
   getUserPoints,
   getPointsRecords
-}; 
+};
+
+// 添加调试日志
+console.log('[pointApi] 模块加载完成', pointApi);
+console.log('[pointApi] getUserPoints存在:', typeof pointApi.getUserPoints === 'function');
+
+module.exports = pointApi; 

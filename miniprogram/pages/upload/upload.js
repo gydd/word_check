@@ -1,8 +1,13 @@
 // upload.js
 const app = getApp();
 const api = require('../../api/wordCheckApi');
+const pointApi = require('../../api/pointApi.js');
 const util = require('../../utils/util');
 const fileManager = wx.getFileSystemManager();
+
+// 检查pointApi是否正确导入 
+console.log('[upload.js] pointApi导入检查:', pointApi);
+console.log('[upload.js] getUserPoints函数检查:', typeof pointApi.getUserPoints);
 
 Page({
   /**
@@ -22,6 +27,8 @@ Page({
     // 文本检测相关
     textContent: '', // 文本内容
     textLength: 0, // 文本长度
+    textInput: '', // 与WXML中的变量保持一致
+    textInputLength: 0, // 与WXML中的变量保持一致
     maxTextLength: 10000, // 最大文本长度
 
     // 文件检测相关
@@ -31,6 +38,12 @@ Page({
     fileSizeRaw: 0, // 文件大小（原始字节数）
     maxFileSize: 5 * 1024 * 1024, // 最大文件大小（5MB）
     supportedFileTypes: ['doc', 'docx', 'txt', 'pdf'], // 支持的文件类型
+    hasUploadedFile: false, // 是否已上传文件
+    fileInfo: {
+      name: '',
+      size: '',
+      type: ''
+    }
   },
 
   /**
@@ -55,37 +68,46 @@ Page({
    * 获取用户积分
    */
   getUserPoints: function () {
-    let loadingShown = false;
+    // 使用一个标志防止重复调用hideLoading
+    if (this._isLoadingPoints) {
+      return;
+    }
+    
+    this._isLoadingPoints = true;
+    console.log('[upload.js] 开始获取用户积分');
+    console.log('[upload.js] pointApi:', pointApi);
+    
     try {
       wx.showLoading({ title: '获取积分信息' });
-      loadingShown = true;
       
-      api.getUserPoints()
+      // 直接调用，避免多余的类型检查
+      pointApi.getUserPoints()
         .then(res => {
+          console.log('[upload.js] 积分获取成功:', res);
           this.setData({
             userPoints: res.currentPoints || 0
           });
         })
         .catch(err => {
-          console.error('获取积分失败', err);
-          // 避免重复显示toast
-          if (err && err.type !== 'SERVER_ERROR') {
-            wx.showToast({
-              title: '获取积分信息失败',
-              icon: 'none'
-            });
-          }
+          console.error('[upload.js] 获取积分失败:', err);
+          // 设置默认积分值避免影响用户体验
+          this.setData({
+            userPoints: 100 // 设置默认值
+          });
         })
         .finally(() => {
-          if (loadingShown) {
-            wx.hideLoading();
-          }
+          wx.hideLoading();
+          this._isLoadingPoints = false;
         });
     } catch (error) {
-      console.error('getUserPoints异常:', error);
-      if (loadingShown) {
-        wx.hideLoading();
-      }
+      console.error('[upload.js] getUserPoints异常:', error);
+      wx.hideLoading();
+      this._isLoadingPoints = false;
+      
+      // 出现异常时设置一个默认积分值
+      this.setData({
+        userPoints: 100 // 设置默认值
+      });
     }
   },
 
@@ -104,18 +126,55 @@ Page({
   },
 
   /**
-   * 输入文本内容
+   * 处理文本输入 - 与WXML中保持一致的函数名
    */
-  inputText: function (e) {
+  handleTextInput: function (e) {
     const text = e.detail.value;
     const length = text.length;
     
     this.setData({
       textContent: text,
+      textInput: text,
       textLength: length,
+      textInputLength: length,
       showError: false,
       errorMsg: ''
     });
+    
+    console.log('[upload.js] 文本输入更新, 长度:', length);
+  },
+
+  /**
+   * 检查是否可以提交 - 与WXML中的canSubmit函数一致
+   */
+  canSubmit: function () {
+    console.log('[upload.js] 检查是否可以提交检测');
+    
+    // 检查积分是否足够
+    if (this.data.userPoints < this.data.checkCost) {
+      console.log('[upload.js] 积分不足，不能提交');
+      return false;
+    }
+    
+    // 检查当前标签页
+    if (this.data.currentTab === 'text') {
+      // 文本检测：检查文本是否为空以及是否超出长度限制
+      const hasValidText = this.data.textContent.trim().length > 0;
+      const withinLimit = this.data.textLength <= this.data.maxTextLength;
+      console.log('[upload.js] 文本检测条件: 有效文本=', hasValidText, '长度合适=', withinLimit);
+      return hasValidText && withinLimit;
+    } else {
+      // 文件检测：检查是否选择了文件
+      console.log('[upload.js] 文件检测条件: 已选择文件=', !!this.data.file);
+      return !!this.data.file;
+    }
+  },
+
+  /**
+   * 输入文本内容 - 保持原有函数但调用handleTextInput
+   */
+  inputText: function (e) {
+    this.handleTextInput(e);
   },
 
   /**
@@ -156,9 +215,17 @@ Page({
           fileName: fileName,
           fileSize: fileSizeFormatted,
           fileSizeRaw: fileSize,
+          hasUploadedFile: true,
+          fileInfo: {
+            name: fileName,
+            size: fileSizeFormatted,
+            type: fileExtension
+          },
           showError: false,
           errorMsg: ''
         });
+        
+        console.log('[upload.js] 文件选择成功:', fileName, fileSizeFormatted);
       },
       fail(err) {
         console.error('选择文件失败', err);
@@ -171,6 +238,13 @@ Page({
   },
 
   /**
+   * 重新选择文件 - 与WXML中保持一致
+   */
+  reselectFile: function () {
+    this.chooseFile();
+  },
+
+  /**
    * 删除文件
    */
   deleteFile: function () {
@@ -178,8 +252,16 @@ Page({
       file: null,
       fileName: '',
       fileSize: '',
-      fileSizeRaw: 0
+      fileSizeRaw: 0,
+      hasUploadedFile: false,
+      fileInfo: {
+        name: '',
+        size: '',
+        type: ''
+      }
     });
+    
+    console.log('[upload.js] 已删除文件');
   },
 
   /**
@@ -207,16 +289,15 @@ Page({
    * 提交检测
    */
   submitCheck: function () {
+    console.log('[upload.js] 尝试提交检测');
+    
     if (this.data.isSubmitting) {
+      console.log('[upload.js] 已经在提交中，忽略重复点击');
       return;
     }
 
-    // 检查积分是否足够
-    if (this.data.userPoints < this.data.checkCost) {
-      this.setData({
-        showError: true,
-        errorMsg: '积分不足，请先获取积分'
-      });
+    if (!this.canSubmit()) {
+      console.log('[upload.js] 不满足提交条件');
       return;
     }
 

@@ -7,6 +7,16 @@ package com.wordcheck.enums;
 public enum PointActionEnum {
     
     /**
+     * 增加积分（与数据库action字段匹配）
+     */
+    ADD(1, "增加积分"),
+    
+    /**
+     * 扣减积分（与数据库action字段匹配）
+     */
+    DEDUCT(2, "扣减积分"),
+    
+    /**
      * 签到奖励
      */
     SIGN_IN_REWARD(101, "签到奖励"),

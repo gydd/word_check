@@ -6,8 +6,7 @@
     "pages/points/points",
     "pages/upload/upload",
     "pages/result/result",
-    "pages/recharge/recharge",
-    "pages/webview/webview"
+    "pages/recharge/recharge"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -43,4 +42,4 @@
   },
   "usingComponents": {},
   "sitemapLocation": "sitemap.json"
-} 
+}

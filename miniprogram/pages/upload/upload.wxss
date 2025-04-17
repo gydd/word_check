@@ -32,6 +32,22 @@
   font-weight: 500;
 }
 
+/* 错误信息样式 */
+.error-message {
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  padding: 16rpx 24rpx;
+  border-radius: 8rpx;
+  margin-bottom: 20rpx;
+  display: flex;
+  align-items: center;
+}
+
+.error-message text {
+  color: #ff4d4f;
+  font-size: 26rpx;
+}
+
 /* 选项卡样式 */
 .tabs {
   display: flex;
@@ -248,6 +264,12 @@
   text-align: center;
   font-size: 26rpx;
   color: #999;
+}
+
+/* 链接文本样式 */
+.link-text {
+  color: #1890ff;
+  text-decoration: underline;
 }
 
 .error-text {

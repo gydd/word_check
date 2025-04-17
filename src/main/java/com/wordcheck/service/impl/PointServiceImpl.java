@@ -20,6 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 /**
  * 积分服务实现类
@@ -88,34 +91,36 @@ public class PointServiceImpl implements PointService {
      */
     @Override
     public PointsRecordDTO getPointsRecords(Integer userId, Integer page, Integer pageSize, String type) {
-        logger.info("获取用户积分记录DTO, userId: {}, page: {}, pageSize: {}, type: {}", userId, page, pageSize, type);
+        logger.info("获取用户积分记录, userId: {}, page: {}, pageSize: {}, type: {}", userId, page, pageSize, type);
+        
+        // 参数校验
+        if (userId == null || userId <= 0) {
+            throw new IllegalArgumentException("用户ID无效");
+        }
+        
+        if (page == null || page <= 0) {
+            page = 1;
+        }
+        
+        if (pageSize == null || pageSize <= 0) {
+            pageSize = 10;
+        }
+        
+        if (type == null) {
+            type = "all";
+        }
         
         // 计算分页参数
         int offset = (page - 1) * pageSize;
         
         // 查询总记录数
-        int total = 0;
-        List<PointRecord> records;
-        
-        // 根据类型查询记录
-        if ("all".equals(type)) {
-            total = pointRecordMapper.countByUserId(userId);
-            records = pointRecordMapper.selectByUserIdWithPagination(userId, offset, pageSize);
-        } else {
-            // 转换类型为数据库识别的类型
-            String dbType = null;
-            if ("earn".equals(type)) {
-                dbType = "INCREASE";
-            } else if ("spend".equals(type)) {
-                dbType = "DECREASE";
-            }
-            
-            total = pointRecordMapper.countByUserIdAndType(userId, dbType);
-            records = pointRecordMapper.findByUserIdAndType(userId, dbType, offset, pageSize);
-        }
+        int total = pointRecordMapper.countByUserIdAndType(userId, type);
         
         // 计算总页数
         int totalPages = (total + pageSize - 1) / pageSize;
+        
+        // 查询记录列表
+        List<PointRecord> pointRecords = pointRecordMapper.findByUserIdAndType(userId, type, offset, pageSize);
         
         // 构建返回对象
         PointsRecordDTO recordsDTO = new PointsRecordDTO();
@@ -123,7 +128,7 @@ public class PointServiceImpl implements PointService {
         recordsDTO.setCurrentPage(page);
         recordsDTO.setPageSize(pageSize);
         recordsDTO.setTotalPages(totalPages);
-        recordsDTO.setRecords(records);
+        recordsDTO.setPointRecords(pointRecords); // 使用新的方法
         
         return recordsDTO;
     }

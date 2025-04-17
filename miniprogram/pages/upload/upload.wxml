@@ -27,6 +27,11 @@
     </view>
   </view>
 
+  <!-- 错误信息显示 -->
+  <view class="error-message" wx:if="{{showError}}">
+    <text>{{errorMsg}}</text>
+  </view>
+
   <!-- 内容区域 -->
   <view class="content">
     <!-- 文本检测内容 -->
@@ -60,9 +65,9 @@
         </view>
       </view>
 
-      <view class="file-info" wx:else>
+      <view class="file-info" wx:if="{{hasUploadedFile}}">
         <view class="file-icon">
-          <text class="iconfont icon-{{fileInfo.type}}"></text>
+          <text class="iconfont icon-{{fileInfo.type || 'file'}}"></text>
         </view>
         <view class="file-details">
           <view class="file-name">{{fileInfo.name}}</view>
@@ -84,7 +89,8 @@
         {{isSubmitting ? '检测中...' : '开始检测'}}
       </button>
       <view class="action-tips" wx:if="{{userPoints < checkCost}}">
-        <text class="error-text">积分不足，请先充值</text>
+        <text class="error-text">积分不足，请先</text>
+        <text class="link-text" bindtap="goToPointsPage">获取积分</text>
       </view>
     </view>
   </view>
