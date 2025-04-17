@@ -37,6 +37,31 @@ public enum PointTypeEnum {
     INITIALIZE(6, "初始化积分"),
     
     /**
+     * 签到积分
+     */
+    SIGN_IN(10, "签到积分"),
+    
+    /**
+     * 单词检查
+     */
+    WORD_CHECK(11, "单词检查"),
+    
+    /**
+     * 学习任务
+     */
+    STUDY_TASK(12, "学习任务"),
+    
+    /**
+     * 消费
+     */
+    CONSUMPTION(20, "消费"),
+    
+    /**
+     * 系统赠送
+     */
+    SYSTEM(30, "系统赠送"),
+    
+    /**
      * 其他类型
      */
     OTHER(99, "其他类型");
@@ -86,13 +111,14 @@ public enum PointTypeEnum {
      * 判断是否为增加类型
      */
     public boolean isIncrease() {
-        return this == INCREASE || this == UNFREEZE;
+        return this == INCREASE || this == UNFREEZE || this == SIGN_IN || 
+               this == WORD_CHECK || this == STUDY_TASK || this == SYSTEM;
     }
     
     /**
      * 判断是否为减少类型
      */
     public boolean isDecrease() {
-        return this == DECREASE || this == FREEZE || this == EXPIRE;
+        return this == DECREASE || this == FREEZE || this == EXPIRE || this == CONSUMPTION;
     }
 } 

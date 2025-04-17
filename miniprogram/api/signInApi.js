@@ -1,5 +1,6 @@
 // signInApi.js
 const app = getApp();
+const config = require('../config/config.js'); // 引入config
 
 /**
  * 处理后端API返回结果的通用方法
@@ -18,12 +19,16 @@ function handleApiResponse(res, resolve, reject) {
   }
 
   const data = res.data;
-  if (data.code === 200) {
+  // 兼容后端两种成功格式 {code: 200, data:{...}} 或 {error: 0, body:{...}}
+  const isSuccess = (data.code === 200) || (data.error === 0);
+  const responseData = data.data || data.body;
+
+  if (isSuccess) {
     // 请求成功
-    resolve(data.data);
-  } else if (data.code === 401) {
+    resolve(responseData);
+  } else if (data.code === 401 || data.error === 401) {
     // 需要登录
-    app.clearLoginInfo();
+    app.clearLoginInfo && app.clearLoginInfo();
     wx.navigateTo({
       url: '/pages/login/login'
     });
@@ -44,12 +49,17 @@ function handleApiResponse(res, resolve, reject) {
  */
 function signIn() {
   return new Promise((resolve, reject) => {
+    const token = wx.getStorageSync(config.cache.tokenKey);
+    if (!token) {
+      reject(new Error('用户未登录'));
+      return;
+    }
     wx.request({
-      url: app.globalData.baseUrl + '/api/v1/sign-in',
+      url: `${config.apiBaseUrl}/api/v1/sign-in`,
       method: 'POST',
       data: {},
       header: {
-        'Authorization': app.globalData.token
+        'Authorization': 'Bearer ' + token // 修正请求头
       },
       success: (res) => {
         handleApiResponse(res, resolve, reject);
@@ -71,11 +81,16 @@ function signIn() {
  */
 function getSignInStatus() {
   return new Promise((resolve, reject) => {
+    const token = wx.getStorageSync(config.cache.tokenKey);
+    if (!token) {
+      reject(new Error('用户未登录'));
+      return;
+    }
     wx.request({
-      url: app.globalData.baseUrl + '/api/v1/sign-in/status',
+      url: `${config.apiBaseUrl}/api/v1/sign-in/status`,
       method: 'GET',
       header: {
-        'Authorization': app.globalData.token
+        'Authorization': 'Bearer ' + token // 修正请求头
       },
       success: (res) => {
         handleApiResponse(res, resolve, reject);

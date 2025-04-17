@@ -21,6 +21,7 @@ import java.security.AlgorithmParameters;
 import java.security.Security;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 微信工具类，用于处理微信相关API操作
@@ -28,6 +29,12 @@ import java.util.Map;
 @Component
 public class WechatUtil {
     private static final Logger logger = LoggerFactory.getLogger(WechatUtil.class);
+    
+    // 错误码常量
+    private static final int ERROR_CODE_BEEN_USED = 40163;  // 授权码已被使用
+    
+    // 用于缓存已使用过的code，防止重复请求
+    private final Map<String, Long> usedCodes = new ConcurrentHashMap<>();
     
     @Value("${weixin.appid}")
     private String appId;
@@ -60,6 +67,12 @@ public class WechatUtil {
      */
     public Map<String, Object> getSessionKey(String jsCode) {
         try {
+            // 首先检查code是否已经使用过
+            if (usedCodes.containsKey(jsCode)) {
+                logger.warn("微信授权码已被使用，code: {}", jsCode);
+                throw new RuntimeException("登录凭证已失效，请重新点击登录按钮");
+            }
+            
             String url = "https://api.weixin.qq.com/sns/jscode2session?appid=" + appId
                     + "&secret=" + appSecret + "&js_code=" + jsCode + "&grant_type=authorization_code";
             
@@ -75,19 +88,49 @@ public class WechatUtil {
             Map<String, Object> result = objectMapper.readValue(responseBody, HashMap.class);
             
             // 检查是否有错误码
-            if (result.containsKey("errcode") && !result.get("errcode").equals(0)) {
-                logger.error("微信API返回错误: {}", result);
-                throw new RuntimeException("微信登录失败: " + result.get("errmsg"));
+            if (result.containsKey("errcode")) {
+                Number errorCode = (Number) result.get("errcode");
+                String errorMsg = (String) result.get("errmsg");
+                
+                // 特殊处理授权码已使用的情况
+                if (errorCode.intValue() == ERROR_CODE_BEEN_USED) {
+                    logger.error("微信授权码已被使用: {}", result);
+                    // 将已使用的code缓存起来，记录当前时间
+                    usedCodes.put(jsCode, System.currentTimeMillis());
+                    throw new RuntimeException("登录凭证已失效，请重新点击登录按钮");
+                }
+                
+                if (!errorCode.equals(0)) {
+                    logger.error("微信API返回错误: {}", result);
+                    throw new RuntimeException("微信登录失败: " + errorMsg);
+                }
             }
             
+            // 登录成功，将code标记为已使用
+            usedCodes.put(jsCode, System.currentTimeMillis());
             return result;
         } catch (ResourceAccessException e) {
             logger.error("调用微信登录API超时", e);
             throw new RuntimeException("微信服务器请求超时，请稍后重试", e);
         } catch (Exception e) {
+            // 如果是我们自定义的错误消息，直接抛出
+            if (e instanceof RuntimeException && e.getMessage() != null && 
+                e.getMessage().contains("登录凭证已失效")) {
+            }
             logger.error("调用微信登录API失败", e);
             throw new RuntimeException("微信登录失败", e);
         }
+    }
+    
+    /**
+     * 清理过期的已使用code缓存
+     * 微信授权码通常有5分钟的有效期，过期后可以从缓存中移除
+     */
+    public void cleanExpiredCodes() {
+        long now = System.currentTimeMillis();
+        long expirationTime = 5 * 60 * 1000; // 5分钟
+        
+        usedCodes.entrySet().removeIf(entry -> (now - entry.getValue()) > expirationTime);
     }
     
     /**

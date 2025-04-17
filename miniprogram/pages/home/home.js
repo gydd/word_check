@@ -36,7 +36,8 @@ Page({
   onShow: function () {
     if (getApp().globalData.token) {
       this.loadUserInfo();
-      this.loadSignInStatus();
+      // 暂时注释掉获取签到状态，因为接口404
+      // this.loadSignInStatus(); 
     }
   },
 
@@ -54,7 +55,7 @@ Page({
         userInfo: userInfo,
         loading: false
       });
-      this.loadSignInStatus();
+      // this.loadSignInStatus();
     } else {
       this.setData({
         loading: false

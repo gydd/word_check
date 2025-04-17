@@ -2,34 +2,39 @@ package com.wordcheck.enums;
 
 /**
  * 积分动作枚举
- * 定义所有可能的积分变动动作
+ * 定义积分变动的具体动作
  */
 public enum PointActionEnum {
     
     /**
-     * 系统赠送
-     */
-    SYSTEM_GRANT(1, "系统赠送"),
-    
-    /**
      * 签到奖励
      */
-    SIGN_IN(2, "签到奖励"),
+    SIGN_IN_REWARD(101, "签到奖励"),
     
     /**
-     * 完成任务
+     * 连续签到奖励
      */
-    COMPLETE_TASK(3, "完成任务"),
+    CONTINUOUS_SIGN_IN_REWARD(102, "连续签到奖励"),
     
     /**
-     * 单词学习
+     * 单词拼写正确奖励
      */
-    WORD_LEARNING(4, "单词学习"),
+    WORD_CORRECT_REWARD(201, "单词拼写正确奖励"),
     
     /**
-     * 完成测试
+     * 学习任务完成奖励
      */
-    COMPLETE_TEST(5, "完成测试"),
+    TASK_COMPLETE_REWARD(301, "学习任务完成奖励"),
+    
+    /**
+     * 消费
+     */
+    CONSUMPTION(401, "积分消费"),
+    
+    /**
+     * 系统赠送
+     */
+    SYSTEM_GRANT(501, "系统赠送"),
     
     /**
      * 邀请好友
@@ -59,7 +64,7 @@ public enum PointActionEnum {
     /**
      * 其他
      */
-    OTHER(99, "其他");
+    OTHER(999, "其他");
     
     /**
      * 动作编码

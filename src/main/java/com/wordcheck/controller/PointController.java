@@ -1,20 +1,15 @@
 package com.wordcheck.controller;
 
+import com.wordcheck.common.ApiResponse;
 import com.wordcheck.model.dto.PointsDTO;
 import com.wordcheck.model.dto.PointsRecordDTO;
 import com.wordcheck.service.PointService;
-import com.wordcheck.util.JwtUtil;
-import com.wordcheck.util.Result;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -22,59 +17,86 @@ import javax.servlet.http.HttpServletRequest;
  * 积分控制器
  */
 @RestController
-@RequestMapping("/api/v1/point")
-@Tag(name = "积分管理", description = "积分相关接口")
+@RequestMapping("/api/v1")
+@Tag(name = "积分", description = "用户积分相关接口")
 @Slf4j
 public class PointController {
-
-    private static final Logger logger = LoggerFactory.getLogger(PointController.class);
 
     @Autowired
     private PointService pointService;
 
-    @Autowired
-    private JwtUtil jwtUtil;
-
     /**
      * 获取用户积分信息
+     *
+     * @param request HTTP请求
+     * @return 用户积分信息
      */
-    @GetMapping("/info")
+    @GetMapping("/points")
     @Operation(summary = "获取用户积分信息")
-    public Result<PointsDTO> getUserPoints(HttpServletRequest request) {
+    public ApiResponse<PointsDTO> getUserPoints(HttpServletRequest request) {
         try {
-            Integer userId = jwtUtil.getUserIdFromRequest(request);
+            Integer userId = (Integer) request.getAttribute("userId");
+            
             if (userId == null) {
-                return Result.fail("未登录");
+                return ApiResponse.error(401, "未登录或登录已过期");
             }
             
-            PointsDTO pointsDTO = pointService.getUserPointsDTO(userId);
-            return Result.success(pointsDTO);
+            PointsDTO points = pointService.getUserPointsDTO(userId);
+            return ApiResponse.success(points);
         } catch (Exception e) {
-            logger.error("获取用户积分信息失败", e);
-            return Result.fail("系统错误");
+            log.error("获取用户积分信息失败", e);
+            return ApiResponse.error(500, "获取用户积分信息失败: " + e.getMessage());
         }
     }
     
     /**
-     * 获取积分记录
+     * 获取用户积分记录
+     *
+     * @param request HTTP请求
+     * @param page 页码
+     * @param pageSize 每页记录数
+     * @param type 记录类型，可选值：all-全部，earn-获取，spend-消费
+     * @return 积分记录
      */
-    @GetMapping("/records")
+    @GetMapping("/points/records")
     @Operation(summary = "获取用户积分记录")
-    public Result<PointsRecordDTO> getPointsRecords(
+    public ApiResponse<PointsRecordDTO> getPointsRecords(
             HttpServletRequest request,
-            @RequestParam(value = "page", defaultValue = "1") Integer page,
-            @RequestParam(value = "size", defaultValue = "10") Integer size,
-            @RequestParam(value = "type", defaultValue = "all") String type) {
+            @Parameter(description = "页码") @RequestParam(defaultValue = "1") int page,
+            @Parameter(description = "每页记录数") @RequestParam(defaultValue = "10") int pageSize,
+            @Parameter(description = "类型:all,earn,spend") @RequestParam(defaultValue = "all") String type
+    ) {
         try {
-            Integer userId = jwtUtil.getUserIdFromRequest(request);
+            Integer userId = (Integer) request.getAttribute("userId");
+            
             if (userId == null) {
-                return Result.fail("未登录");
+                return ApiResponse.error(401, "未登录或登录已过期");
             }
-            PointsRecordDTO records = pointService.getPointsRecords(userId, page, size, type);
-            return Result.success(records);
+            
+            // 验证参数
+            if (page < 1) {
+                return ApiResponse.error(400, "页码必须大于0");
+            }
+            
+            if (pageSize < 1 || pageSize > 100) {
+                return ApiResponse.error(400, "每页记录数必须在1-100之间");
+            }
+            
+            PointsRecordDTO records = pointService.getPointsRecords(userId, page, pageSize, type);
+            return ApiResponse.success(records);
         } catch (Exception e) {
-            logger.error("获取用户积分记录失败", e);
-            return Result.fail("系统错误");
+            log.error("获取用户积分记录失败", e);
+            return ApiResponse.error(500, "获取用户积分记录失败: " + e.getMessage());
         }
+    }
+    
+    /**
+     * 兼容旧版API路径 - 获取用户积分信息
+     * 前端仍在使用/point/info路径，添加此方法以保持兼容
+     */
+    @GetMapping("/point/info")
+    @Operation(summary = "获取用户积分信息(兼容旧版)")
+    public ApiResponse<PointsDTO> getUserPointsLegacy(HttpServletRequest request) {
+        return getUserPoints(request);
     }
 } 

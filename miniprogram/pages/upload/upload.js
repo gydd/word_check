@@ -55,23 +55,38 @@ Page({
    * 获取用户积分
    */
   getUserPoints: function () {
-    wx.showLoading({ title: '获取积分信息' });
-    api.getUserPoints()
-      .then(res => {
-        this.setData({
-          userPoints: res.currentPoints || 0
+    let loadingShown = false;
+    try {
+      wx.showLoading({ title: '获取积分信息' });
+      loadingShown = true;
+      
+      api.getUserPoints()
+        .then(res => {
+          this.setData({
+            userPoints: res.currentPoints || 0
+          });
+        })
+        .catch(err => {
+          console.error('获取积分失败', err);
+          // 避免重复显示toast
+          if (err && err.type !== 'SERVER_ERROR') {
+            wx.showToast({
+              title: '获取积分信息失败',
+              icon: 'none'
+            });
+          }
+        })
+        .finally(() => {
+          if (loadingShown) {
+            wx.hideLoading();
+          }
         });
-      })
-      .catch(err => {
-        console.error('获取积分失败', err);
-        wx.showToast({
-          title: '获取积分信息失败',
-          icon: 'none'
-        });
-      })
-      .finally(() => {
+    } catch (error) {
+      console.error('getUserPoints异常:', error);
+      if (loadingShown) {
         wx.hideLoading();
-      });
+      }
+    }
   },
 
   /**
