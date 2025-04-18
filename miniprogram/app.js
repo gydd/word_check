@@ -20,6 +20,69 @@ App({
   },
 
   /**
+   * 应用启动时的处理
+   */
+  onLaunch: function() {
+    console.log('应用启动');
+    
+    // 处理图片加载错误
+    this.handleImageError();
+    
+    // 从本地存储中获取token和userInfo
+    const token = wx.getStorageSync('token') || '';
+    const userInfo = wx.getStorageSync('userInfo') || null;
+    
+    // 打印调试信息
+    console.log('应用启动，从存储读取token:', token);
+    
+    // 确保token格式正确
+    if (token && !token.startsWith('Bearer ')) {
+      this.globalData.token = 'Bearer ' + token;
+      console.log('token格式处理，添加Bearer前缀');
+    } else {
+      this.globalData.token = token;
+    }
+    
+    console.log('设置全局token:', this.globalData.token);
+    this.globalData.userInfo = userInfo;
+    
+    // 导入userApi模块
+    const userApi = require('./api/userApi.js');
+    
+    // 初始化EventEmitter
+    if (!this.globalData.emitter && userApi.EventEmitter) {
+      this.globalData.emitter = new userApi.EventEmitter();
+    }
+    
+    // 检查登录状态
+    this.checkLoginStatus();
+  },
+  
+  /**
+   * 处理图片加载错误
+   */
+  handleImageError: function() {
+    // 拦截小程序的图片错误事件
+    wx.onError((error) => {
+      console.log('[全局错误监听]', error);
+      
+      // 检查是否是图片加载错误
+      if (error && error.includes && (
+          error.includes('Failed to load image') || 
+          error.includes('404')
+      )) {
+        console.warn('[图片加载失败]', error);
+        
+        // 图片错误处理逻辑
+        if (error.includes('default-avatar.png')) {
+          console.info('[头像加载错误] 使用本地默认头像代替');
+          // 这里只记录错误，实际的替换在userHelper.js中处理
+        }
+      }
+    });
+  },
+
+  /**
    * 检查登录状态
    */
   checkLoginStatus: function() {
@@ -336,67 +399,6 @@ App({
     // 释放登录锁
     if (userApi.LoginLock && userApi.LoginLock.isLocked()) {
       userApi.LoginLock.release();
-    }
-  },
-
-  onLaunch: function() {
-    console.log('应用启动');
-    
-    // 启动小程序时执行的逻辑
-    const token = wx.getStorageSync('token') || '';
-    const userInfo = wx.getStorageSync('userInfo') || null;
-    
-    // 打印调试信息
-    console.log('应用启动，从存储读取token:', token);
-    
-    // 确保token格式正确
-    if (token && !token.startsWith('Bearer ')) {
-      this.globalData.token = 'Bearer ' + token;
-      console.log('token格式处理，添加Bearer前缀');
-    } else {
-      this.globalData.token = token;
-    }
-    
-    console.log('设置全局token:', this.globalData.token);
-    this.globalData.userInfo = userInfo;
-    
-    // 导入userApi模块
-    const userApi = require('./api/userApi.js');
-    
-    // 初始化EventEmitter
-    if (!this.globalData.emitter && userApi.EventEmitter) {
-      this.globalData.emitter = new userApi.EventEmitter();
-    }
-    
-    if (token) {
-      // 验证token是否有效，不再自动设置登录状态
-      this.checkToken().then(valid => {
-        // 只有在token验证有效的情况下才进行状态更新
-        if (valid) {
-          userApi.LoginState.setState(userApi.LoginState.LOGGED_IN);
-          this.globalData.isLoggedIn = true;
-        } else {
-          // token无效，不自动触发登录
-          console.log('Token无效，等待用户主动触发登录');
-        }
-      });
-    } else {
-      console.log('未找到token，等待用户主动登录');
-    }
-    
-    // 优化自动登录逻辑
-    if (wx.getStorageSync('token')) {
-      console.log('启动时发现token，尝试自动登录');
-      this.autoLogin()
-        .then(userInfo => {
-          console.log('自动登录成功', userInfo);
-        })
-        .catch(error => {
-          console.log('自动登录失败', error);
-          // 不在启动时反复尝试，避免循环
-        });
-    } else {
-      console.log('启动时未发现token，跳过自动登录');
     }
   },
   

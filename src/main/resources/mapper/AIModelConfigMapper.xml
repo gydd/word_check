@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wordcheck.mapper.AIModelConfigMapper">
+    
+    <!-- 结果映射 -->
+    <resultMap id="AIModelConfigResult" type="com.wordcheck.model.AIModelConfig">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="provider" column="provider"/>
+        <result property="apiUrl" column="api_url"/>
+        <result property="modelId" column="model_id"/>
+        <result property="apiKey" column="api_key"/>
+        <result property="isDefault" column="is_default"/>
+        <result property="timeout" column="timeout"/>
+        <result property="promptTemplate" column="prompt_template"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+    
+    <!-- 获取所有AI模型配置 -->
+    <select id="findAll" resultMap="AIModelConfigResult">
+        SELECT * FROM ai_model_config ORDER BY id ASC
+    </select>
+    
+    <!-- 根据ID查询AI模型配置 -->
+    <select id="findById" parameterType="java.lang.Integer" resultMap="AIModelConfigResult">
+        SELECT * FROM ai_model_config WHERE id = #{id}
+    </select>
+    
+    <!-- 查询默认的AI模型配置 -->
+    <select id="findDefault" resultMap="AIModelConfigResult">
+        SELECT * FROM ai_model_config WHERE is_default = 1 LIMIT 1
+    </select>
+    
+    <!-- 获取可用的AI模型配置列表 -->
+    <select id="findAvailable" resultMap="AIModelConfigResult">
+        SELECT id, name, provider, model_id, is_default FROM ai_model_config 
+        WHERE api_url IS NOT NULL AND api_key IS NOT NULL 
+        ORDER BY is_default DESC, id ASC
+    </select>
+    
+    <!-- 插入AI模型配置 -->
+    <insert id="insert" parameterType="com.wordcheck.model.AIModelConfig" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ai_model_config (
+            name, provider, api_url, model_id, api_key, is_default, timeout, prompt_template, created_at, updated_at
+        ) VALUES (
+            #{name}, #{provider}, #{apiUrl}, #{modelId}, #{apiKey}, #{isDefault}, #{timeout}, #{promptTemplate}, NOW(), NOW()
+        )
+    </insert>
+    
+    <!-- 更新AI模型配置 -->
+    <update id="update" parameterType="com.wordcheck.model.AIModelConfig">
+        UPDATE ai_model_config
+        SET name = #{name},
+            provider = #{provider},
+            api_url = #{apiUrl},
+            model_id = #{modelId},
+            api_key = #{apiKey},
+            is_default = #{isDefault},
+            timeout = #{timeout},
+            prompt_template = #{promptTemplate},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+    
+    <!-- 删除AI模型配置 -->
+    <delete id="delete" parameterType="java.lang.Integer">
+        DELETE FROM ai_model_config WHERE id = #{id}
+    </delete>
+    
+    <!-- 设置指定ID的模型为默认模型 -->
+    <update id="setDefault" parameterType="java.lang.Integer">
+        UPDATE ai_model_config
+        SET is_default = CASE WHEN id = #{id} THEN 1 ELSE 0 END,
+            updated_at = NOW()
+        WHERE id = #{id} OR is_default = 1
+    </update>
+    
+    <!-- 重置所有模型的默认状态 -->
+    <update id="resetAllDefault">
+        UPDATE ai_model_config SET is_default = 0, updated_at = NOW()
+    </update>
+    
+</mapper> 

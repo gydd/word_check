@@ -1,0 +1,18 @@
+<!-- webview.wxml -->
+<view class="container">
+  <!-- 加载错误提示 -->
+  <view class="error-container" wx:if="{{error}}">
+    <icon type="warn" size="64"></icon>
+    <text class="error-text">网页加载失败</text>
+    <button class="refresh-btn" bindtap="onLoad">重新加载</button>
+  </view>
+  
+  <!-- 加载中提示 -->
+  <view class="loading-container" wx:elif="{{loading}}">
+    <view class="loading-icon"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+  
+  <!-- WebView组件 -->
+  <web-view wx:else src="{{url}}" bindload="onWebViewLoad" binderror="onWebViewError"></web-view>
+</view> 

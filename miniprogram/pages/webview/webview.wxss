@@ -1,0 +1,61 @@
+/* webview.wxss */
+.container {
+  height: 100vh;
+  background-color: #f5f7fa;
+}
+
+/* 加载错误样式 */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 30rpx;
+}
+
+.error-text {
+  font-size: 32rpx;
+  color: #ff4d4f;
+  margin: 30rpx 0;
+}
+
+.refresh-btn {
+  width: 300rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  background-color: #1890ff;
+  color: #fff;
+  font-size: 28rpx;
+  border-radius: 40rpx;
+}
+
+/* 加载中样式 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.loading-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  border: 6rpx solid #f3f3f3;
+  border-top: 6rpx solid #1890ff;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #888;
+  margin-top: 20rpx;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+} 

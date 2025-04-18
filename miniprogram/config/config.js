@@ -24,5 +24,10 @@ module.exports = {
     tokenKey: 'token',            // token存储键名
     userInfoKey: 'userInfo',      // 用户信息存储键名
     tokenExpireKey: 'tokenExpire' // token过期时间存储键名
+  },
+  
+  // 资源配置
+  resources: {
+    defaultAvatar: '/static/images/default-avatar.png'  // 默认头像路径
   }
 }; 

@@ -30,6 +30,24 @@
   <!-- 错误信息显示 -->
   <view class="error-message" wx:if="{{showError}}">
     <text>{{errorMsg}}</text>
+    <view class="error-actions">
+      <text class="error-retry" bindtap="retryLastRequest">重试</text>
+      <text class="error-close" bindtap="resetErrorState">关闭</text>
+    </view>
+  </view>
+
+  <!-- AI模型选择 -->
+  <view class="ai-model-section" wx:if="{{modelConfigs.length > 0}}">
+    <view class="section-title">选择AI模型</view>
+    <radio-group bindchange="handleModelChange">
+      <view class="model-item" wx:for="{{modelConfigs}}" wx:key="id">
+        <radio value="{{item.id}}" checked="{{item.id == selectedModelId}}"/>
+        <view class="model-info">
+          <view class="model-name">{{item.name}}</view>
+          <view class="model-provider">{{item.provider}}</view>
+        </view>
+      </view>
+    </radio-group>
   </view>
 
   <!-- 内容区域 -->
@@ -38,7 +56,7 @@
     <view class="text-content" wx:if="{{currentTab === 'text'}}">
       <view class="text-input-area">
         <textarea 
-          class="text-input" 
+          class="text-input {{!textContent ? 'empty-input' : ''}}" 
           placeholder="请输入需要检测的文本内容..."
           placeholder-class="placeholder"
           bindinput="handleTextInput"
@@ -49,7 +67,8 @@
         <view class="text-counter">{{textInputLength}}/10000</view>
       </view>
       <view class="text-tips">
-        <text>提示：请输入您需要检测的文本，最多支持10000字符</text>
+        <text wx:if="{{!textContent || textContent.trim().length === 0}}" class="empty-tip">请输入文本内容后再点击提交检测按钮</text>
+        <text wx:else>提示：请输入您需要检测的文本，最多支持10000字符</text>
       </view>
     </view>
 
@@ -80,18 +99,51 @@
       </view>
     </view>
     
-    <!-- 提交按钮 -->
+    <!-- 底部操作区域 -->
     <view class="action-area">
-      <button 
-        class="submit-button {{canSubmit() ? '' : 'disabled'}}" 
-        bindtap="submitCheck"
-        disabled="{{isSubmitting || !canSubmit()}}">
-        {{isSubmitting ? '检测中...' : '开始检测'}}
-      </button>
-      <view class="action-tips" wx:if="{{userPoints < checkCost}}">
-        <text class="error-text">积分不足，请先</text>
-        <text class="link-text" bindtap="goToPointsPage">获取积分</text>
+      <!-- 操作按钮区域 -->
+      <view class="action-buttons">
+        <button 
+          class="submit-button {{!canSubmit() ? 'disabled' : ''}}" 
+          bindtap="submitCheck"
+          hover-class="button-hover"
+          hover-start-time="10">
+          <view class="button-content">
+            <text class="button-text">{{isSubmitting ? '提交中...' : '提交检测'}}</text>
+            <text class="button-icon" wx:if="{{isSubmitting}}">⟳</text>
+          </view>
+        </button>
+
+        <!-- 调试按钮 -->
+        <button 
+          class="debug-button" 
+          bindtap="showDebugInfo"
+          style="margin-top: 10px; background-color: #f0f0f0; color: #666;">
+          调试信息
+        </button>
+      </view>
+      
+      <!-- 调试信息 -->
+      <view class="debug-info">
+        <view>文本长度: {{textLength}}</view>
+        <view>用户积分: {{userPoints}}</view>
+        <view>检测费用: {{checkCost}}</view>
+        <view>选中模型: {{selectedModelId || '未选择'}}</view>
+        <view>提交状态: {{isSubmitting ? '提交中' : '未提交'}}</view>
+        <view>可提交: {{canSubmit()}}</view>
       </view>
     </view>
   </view>
+</view>
+
+<!-- 调试信息区域 -->
+<view class="debug-info" wx:if="{{true}}">
+  <text>调试信息</text>
+  <view>用户积分: {{userPoints}}</view>
+  <view>检测费用: {{checkCost}}</view>
+  <view>当前标签: {{currentTab}}</view>
+  <view>文本长度: {{textLength}}/{{maxTextLength}}</view>
+  <view wx:if="{{modelConfigs.length > 0}}">已选模型: {{selectedModelId || '未选择'}}</view>
+  <view>文件状态: {{file ? '已选择文件' : '未选择文件'}}</view>
+  <view>canSubmit函数返回: {{canSubmit()}}</view>
 </view> 

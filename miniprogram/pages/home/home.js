@@ -20,7 +20,7 @@ Page({
       points: 0
     },
     loading: true,
-    loadingSignIn: false,
+    loadingSignIn: true, // 设置为true，显示加载中状态
     userInfoLoaded: false,
     // 轮播图相关数据
     carouselItems: [],
@@ -59,6 +59,8 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
+    console.log('[home.js] 页面加载');
+    
     // 先检查登录状态
     this.checkLoginStatus();
     
@@ -71,15 +73,23 @@ Page({
     
     // 预检查头像状态，但确保不影响其他功能
     this.preCheckAvatarStatus();
+
+    // 立即加载签到状态
+    if (getApp().globalData.token) {
+      this.loadSignInStatus();
+    }
   },
 
   /**
    * 生命周期函数--监听页面显示
    */
   onShow: function () {
+    console.log('[home.js] 页面显示');
+    
     if (getApp().globalData.token) {
-      // 先加载签到状态，优先保证签到功能正常
+      // 加载签到状态 - 页面每次显示都需要检查最新状态
       this.loadSignInStatus();
+      
       // 再加载用户信息
       this.loadUserInfo();
     }
@@ -243,11 +253,12 @@ Page({
       this.setData({
         loading: false
       });
-      // 立即加载签到状态
-      this.loadSignInStatus();
+      
+      // 不在这里立即加载签到状态，会在onLoad和onShow中处理
     } else {
       this.setData({
-        loading: false
+        loading: false,
+        loadingSignIn: false // 未登录不显示签到加载
       });
       wx.navigateTo({
         url: '/pages/login/login'
@@ -405,22 +416,37 @@ Page({
    * 加载签到状态
    */
   loadSignInStatus: function () {
+    console.log('[home.js] 加载签到状态');
+    
+    // 设置为加载中状态
     this.setData({
       loadingSignIn: true
     });
     
+    // 检查token
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      console.log('[home.js] 未登录，不加载签到状态');
+      this.setData({
+        loadingSignIn: false
+      });
+      return;
+    }
+    
     signInApi.getSignInStatus()
       .then(res => {
+        console.log('[home.js] 获取签到状态成功:', res);
+        
         this.setData({
           loadingSignIn: false
         });
         
-        console.log('获取签到状态成功:', res);
+        let hasSigned = false;
         
         if (res.success) {
           // 处理后端返回的数据
           const totalDays = res.data.totalDays || res.data.totalSignDays || 0;
-          const hasSigned = res.data.hasSigned || false;
+          hasSigned = res.data.hasSigned || false;
           
           this.setData({
             signInStatus: {
@@ -432,10 +458,11 @@ Page({
             }
           });
           
-          console.log('签到状态已更新:', this.data.signInStatus);
+          console.log('[home.js] 签到状态已更新, 今日已签到:', hasSigned);
         } else if (res.alreadySigned) {
           // 已签到状态
           const totalDays = res.data.totalDays || res.data.totalSignDays || 0;
+          hasSigned = true;
           
           this.setData({
             signInStatus: {
@@ -447,11 +474,11 @@ Page({
             }
           });
           
-          console.log('已签到状态已更新:', this.data.signInStatus);
+          console.log('[home.js] 已签到状态已更新, 今日已签到:', true);
         }
       })
       .catch(err => {
-        console.error('获取签到状态失败', err);
+        console.error('[home.js] 获取签到状态失败', err);
         this.setData({
           loadingSignIn: false
         });
@@ -462,13 +489,17 @@ Page({
    * 处理签到
    */
   handleSignIn: function () {
+    console.log('[home.js] 处理签到操作');
+    
     // 如果正在加载或已经签到，禁止操作
     if (this.data.loadingSignIn) {
+      console.log('[home.js] 签到加载中，禁止操作');
       return;
     }
     
     // 如果已经签到，直接提示
     if (this.data.signInStatus.hasSigned || this.data.signInStatus.todaySigned) {
+      console.log('[home.js] 今日已签到，显示提示');
       wx.showToast({
         title: '今日已签到',
         icon: 'none'
@@ -476,17 +507,19 @@ Page({
       return;
     }
 
+    // 设置加载中状态
     this.setData({
       loadingSignIn: true
     });
 
+    console.log('[home.js] 发起签到请求');
     signInApi.signIn()
       .then(res => {
+        console.log('[home.js] 签到返回结果:', res);
+        
         this.setData({
           loadingSignIn: false
         });
-        
-        console.log('签到返回结果:', res);
         
         if (res.success) {
           // 签到成功
@@ -503,7 +536,7 @@ Page({
             }
           });
           
-          console.log('签到成功后状态:', this.data.signInStatus);
+          console.log('[home.js] 签到成功后状态，今日已签到:', true);
 
           wx.showToast({
             title: `签到成功，获得${res.data.addedPoints || 1}积分`,
@@ -527,7 +560,7 @@ Page({
             }
           });
           
-          console.log('已签到状态反馈:', this.data.signInStatus);
+          console.log('[home.js] 已签到状态反馈，今日已签到:', true);
           
           wx.showToast({
             title: res.message || '今日已签到',
@@ -542,7 +575,7 @@ Page({
         }
       })
       .catch(err => {
-        console.error('签到失败', err);
+        console.error('[home.js] 签到失败', err);
         this.setData({
           loadingSignIn: false
         });

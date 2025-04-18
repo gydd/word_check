@@ -1,0 +1,356 @@
+/* home.wxss */
+.container {
+  padding: 30rpx;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+}
+
+/* 加载中样式 */
+.loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.loading-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  border: 6rpx solid #f3f3f3;
+  border-top: 6rpx solid #1890ff;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 头部用户信息样式 */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+  background-color: #f5f5f5;
+  border: 1px solid #eee;
+  overflow: hidden;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NjY2NjYyI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4=');
+  background-size: 60%;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.user-detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.nickname {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.user-level {
+  font-size: 24rpx;
+  color: #888;
+}
+
+.points-info {
+  text-align: center;
+}
+
+.points-value {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #ff6b6b;
+}
+
+.points-label {
+  font-size: 24rpx;
+  color: #888;
+}
+
+/* 签到区域样式 */
+.sign-in-section {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.sign-in-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.sign-in-days {
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+.sign-in-text {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.sign-in-total {
+  font-size: 24rpx;
+  color: #888;
+}
+
+.sign-in-btn {
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  background-color: #1890ff;
+  color: #fff;
+  font-size: 32rpx;
+  border-radius: 44rpx;
+  margin-top: 20rpx;
+}
+
+/* 已签到样式 */
+.sign-in-btn.signed {
+  background-color: #52c41a;
+}
+
+/* 签到加载中样式 */
+.sign-in-btn.loading {
+  background-color: #bfbfbf;
+  color: #fff;
+}
+
+/* 签到加载样式 */
+.sign-in-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 160rpx;
+}
+
+.loading-dots {
+  display: flex;
+  align-items: center;
+}
+
+.loading-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background-color: #1890ff;
+  margin: 0 10rpx;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.loading-dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
+/* 签到错误样式 */
+.sign-in-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30rpx 0;
+}
+
+.sign-in-error text {
+  font-size: 28rpx;
+  color: #ff4d4f;
+  margin-bottom: 20rpx;
+}
+
+.refresh-btn {
+  width: 200rpx;
+  height: 70rpx;
+  line-height: 70rpx;
+  text-align: center;
+  background-color: #f5f5f5;
+  color: #333;
+  font-size: 28rpx;
+  border-radius: 35rpx;
+}
+
+/* 轮播图容器 */
+.banner-section {
+  margin-bottom: 30rpx;
+  height: 300rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  background-color: #fff;
+  position: relative;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 轮播图样式 */
+.banner {
+  height: 300rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s ease;
+}
+
+swiper-item:active .banner-image {
+  transform: scale(0.98);
+}
+
+/* 轮播图标题 */
+.banner-title {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 16rpx 24rpx;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0));
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: bold;
+  box-sizing: border-box;
+}
+
+/* 轮播图加载中 */
+.carousel-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: #f9f9f9;
+}
+
+.carousel-loading text {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 16rpx;
+}
+
+/* 轮播图错误 */
+.carousel-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+
+.carousel-error text {
+  font-size: 24rpx;
+  color: #ff4d4f;
+  margin-top: 16rpx;
+}
+
+/* 无轮播图 */
+.carousel-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: #f9f9f9;
+}
+
+.carousel-empty text {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 功能区域样式 */
+.features {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.feature-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.feature-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.feature-item {
+  width: 25%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 0;
+}
+
+.feature-icon {
+  width: 80rpx;
+  height: 80rpx;
+  margin-bottom: 16rpx;
+}
+
+.feature-name {
+  font-size: 24rpx;
+  color: #333;
+}
+
+/* 底部样式 */
+.footer {
+  text-align: center;
+  padding: 30rpx 0;
+}
+
+.footer-text {
+  font-size: 24rpx;
+  color: #999;
+} 
