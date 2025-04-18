@@ -41,5 +41,23 @@
     ]
   },
   "usingComponents": {},
-  "sitemapLocation": "sitemap.json"
+  "sitemapLocation": "sitemap.json",
+  "permission": {
+    "scope.userLocation": {
+      "desc": "您的位置信息将用于处理订单"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation"
+  ],
+  "requiredBackgroundModes": [
+    "audio"
+  ],
+  "navigateToMiniProgramAppIdList": [],
+  "plugins": {
+    "sdkPlugin": {
+      "version": "3.16.0",
+      "provider": "wxc6a13dda5815c529"
+    }
+  }
 }

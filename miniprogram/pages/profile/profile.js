@@ -21,6 +21,7 @@ Page({
    */
   onLoad: function (options) {
     this.checkLoginStatus()
+    this.preCheckAvatarStatus()
   },
 
   /**
@@ -180,5 +181,51 @@ Page({
     wx.navigateTo({
       url: '/pages/settings/settings'
     })
+  },
+  
+  /**
+   * 处理头像加载错误
+   */
+  handleAvatarError: function(e) {
+    console.warn('个人页面头像加载失败，使用默认头像');
+    // 将用户头像URL设置为默认头像
+    if (this.data.userInfo) {
+      let userInfo = this.data.userInfo;
+      userInfo.avatarUrl = '/static/images/default-avatar.png';
+      this.setData({
+        userInfo: userInfo
+      });
+      
+      // 更新缓存中的用户信息，避免每次进入页面都出现错误
+      wx.setStorageSync('userInfo', userInfo);
+    }
+  },
+
+  /**
+   * 预检查头像状态
+   */
+  preCheckAvatarStatus: function() {
+    const userInfo = this.data.userInfo;
+    
+    if (userInfo && userInfo.avatarUrl) {
+      // 预加载图片确认是否有效
+      wx.getImageInfo({
+        src: userInfo.avatarUrl,
+        success: (res) => {
+          console.log('个人页面头像预加载成功:', res);
+        },
+        fail: (err) => {
+          console.warn('个人页面头像预加载失败:', err);
+          // 使用默认头像
+          userInfo.avatarUrl = '/static/images/default-avatar.png';
+          this.setData({
+            userInfo: userInfo
+          });
+          
+          // 更新缓存中的用户信息
+          wx.setStorageSync('userInfo', userInfo);
+        }
+      });
+    }
   }
 })

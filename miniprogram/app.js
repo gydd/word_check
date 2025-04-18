@@ -88,22 +88,25 @@ App({
       
       // 使用token访问需要认证的接口，验证token是否有效
       wx.request({
-        url: this.globalData.baseUrl + '/api/v1/user/info',
+        url: this.globalData.baseUrl + '/api/v1/user',
         method: 'GET',
         header: {
-          'Authorization': token
+          'Authorization': token.startsWith('Bearer ') ? token : 'Bearer ' + token
         },
         success: (res) => {
           console.log('验证token响应:', res);
           
           if (res.statusCode === 200) {
-            if (res.data.code === 200) {
+            // 兼容后端两种响应格式: {code: 200, data:{...}} 或 {error: 0, body:{...}}
+            const isSuccess = (res.data.code === 200) || (res.data.error === 0);
+            const userData = res.data.data || res.data.body;
+            
+            if (isSuccess && userData) {
               console.log('token有效，用户已登录');
               // 刷新用户信息
-              const userInfo = res.data.data;
-              this.globalData.userInfo = userInfo;
-              this.globalData.userId = userInfo.id;
-              wx.setStorageSync('userInfo', userInfo);
+              this.globalData.userInfo = userData;
+              this.globalData.userId = userData.id;
+              wx.setStorageSync('userInfo', userData);
               
               // 导入userApi模块
               const userApi = require('./api/userApi.js');

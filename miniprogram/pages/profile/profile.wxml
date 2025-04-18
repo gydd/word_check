@@ -4,7 +4,10 @@
   <view class="user-info-section">
     <view class="user-info-card">
       <view class="avatar-container" bindtap="onTapAvatar">
-        <image class="avatar" src="{{userInfo.avatarUrl || '/static/images/default-avatar.png'}}" mode="aspectFill"></image>
+        <image class="avatar" 
+               src="{{userInfo.avatarUrl || '/static/images/default-avatar.png'}}" 
+               mode="aspectFill"
+               binderror="handleAvatarError"></image>
       </view>
       <view class="user-details" wx:if="{{isLoggedIn}}">
         <view class="nickname">{{userInfo.nickname || '微信用户'}}</view>

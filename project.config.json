@@ -21,5 +21,8 @@
     "include": []
   },
   "appid": "wxa80c1fbffae22654",
-  "editorSetting": {}
+  "editorSetting": {},
+  "libVersion": "2.30.2",
+  "projectname": "word_check",
+  "condition": {}
 }

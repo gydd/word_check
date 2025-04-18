@@ -7,7 +7,10 @@
   <!-- 用户信息 -->
   <view class="header">
     <view class="user-info">
-      <image class="avatar" src="{{userInfo.avatarUrl || '/static/images/default-avatar.png'}}"></image>
+      <image class="avatar" 
+             src="{{userInfo.avatarUrl || '/static/images/default-avatar.png'}}" 
+             binderror="handleAvatarError" 
+             mode="aspectFill"></image>
       <view class="user-detail">
         <text class="nickname">{{userInfo.nickname || '未登录'}}</text>
         <text class="user-level">普通用户</text>
@@ -37,7 +40,7 @@
         <view class="sign-in-text">已连续签到 {{signInStatus.continuousDays || 0}} 天</view>
         <view class="sign-in-total">累计签到 {{signInStatus.totalSignDays || 0}} 天</view>
       </view>
-      <view class="sign-in-btn {{signInStatus.todaySigned ? 'signed' : ''}}" bindtap="handleSignIn">
+       <view class="sign-in-btn {{signInStatus.todaySigned ? 'signed' : ''}}" bindtap="handleSignIn">
         {{signInStatus.todaySigned ? '已签到' : '签到'}}
       </view>
     </block>

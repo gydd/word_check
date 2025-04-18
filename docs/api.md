@@ -379,8 +379,8 @@
 
 ## 6. 开发环境与测试
 
-- 开发环境API地址: `http://dev-api.example.com`
-- 测试环境API地址: `http://test-api.example.com`
-- 生产环境API地址: `https://api.example.com`
+- 开发环境API地址: `http://127.0.0.1:8080`
+- 测试环境API地址: `http://127.0.0.1:8080`
+- 生产环境API地址: `http://127.0.0.1:8080`
 
 请确保在请求时设置正确的Content-Type和Authorization头信息。 

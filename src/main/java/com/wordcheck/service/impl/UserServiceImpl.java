@@ -281,7 +281,7 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setOpenid(openid);
         user.setNickname("用户" + openid.substring(openid.length() - 6));
-        user.setAvatarUrl("https://example.com/default-avatar.png");
+        user.setAvatarUrl("");
         user.setGender(0);
         user.setStatus(1);
         user.setCreatedAt(LocalDateTime.now());

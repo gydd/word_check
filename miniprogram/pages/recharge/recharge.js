@@ -1,5 +1,7 @@
 const app = getApp();
 const api = require('../../api/wordCheckApi');
+const rechargeApi = require('../../api/rechargeApi');
+const pointApi = require('../../api/pointApi');
 
 Page({
   /**
@@ -45,21 +47,68 @@ Page({
    */
   getUserPoints: function () {
     wx.showLoading({ title: '获取积分信息' });
-    api.getUserPoints()
-      .then(res => {
+    
+    // 尝试使用pointApi获取积分
+    pointApi.getUserPoints()
+      .then(pointsData => {
+        console.log('pointApi返回的积分信息:', pointsData);
+        
+        // 提取正确的积分值
+        let points = 0;
+        if (typeof pointsData === 'number') {
+          // 如果直接返回数值
+          points = pointsData;
+        } else if (pointsData && typeof pointsData === 'object') {
+          // 如果返回对象，尝试获取不同可能的字段名
+          if (typeof pointsData.availablePoints === 'number') {
+            points = pointsData.availablePoints;
+          } else if (typeof pointsData.points === 'number') {
+            points = pointsData.points;
+          } else if (typeof pointsData.point === 'number') {
+            points = pointsData.point;
+          } else if (typeof pointsData.balance === 'number') {
+            points = pointsData.balance;
+          } else {
+            // 如果无法确定字段，记录对象以便调试
+            console.warn('无法从返回数据中提取积分:', pointsData);
+            
+            // 尝试找到第一个看起来像积分的数值
+            for (const key in pointsData) {
+              if (typeof pointsData[key] === 'number' && key.toLowerCase().includes('point')) {
+                points = pointsData[key];
+                console.log(`找到可能的积分字段 "${key}":`, points);
+                break;
+              }
+            }
+          }
+        }
+        
         this.setData({
-          userPoints: res.availablePoints || 0
+          userPoints: points
         });
+        wx.hideLoading();
       })
       .catch(err => {
-        console.error('获取积分失败', err);
-        wx.showToast({
-          title: '获取积分信息失败',
-          icon: 'none'
-        });
-      })
-      .finally(() => {
-        wx.hideLoading();
+        console.error('pointApi获取积分失败，尝试使用wordCheckApi:', err);
+        
+        // 如果pointApi失败，尝试使用wordCheckApi
+        api.getUserPoints()
+          .then(res => {
+            console.log('wordCheckApi返回的积分信息:', res);
+            this.setData({
+              userPoints: res.availablePoints || 0
+            });
+          })
+          .catch(err => {
+            console.error('获取积分失败', err);
+            wx.showToast({
+              title: '获取积分信息失败',
+              icon: 'none'
+            });
+          })
+          .finally(() => {
+            wx.hideLoading();
+          });
       });
   },
 
@@ -156,61 +205,144 @@ Page({
     }
     
     this.setData({ isProcessing: true });
+    wx.showLoading({ title: '订单处理中' });
     
-    // 生成微信支付参数
-    api.createRechargeOrder({
-      amount: amount,
-      paymentMethod: this.data.paymentMethod
-    })
+    console.log(`准备创建充值订单，金额: ${amount}元`);
+    
+    // 首先尝试使用专用的rechargeApi
+    const createOrder = () => {
+      try {
+        // 先尝试使用rechargeApi
+        if (typeof rechargeApi.createRechargeOrder === 'function') {
+          console.log('使用rechargeApi创建订单');
+          return rechargeApi.createRechargeOrder({
+            packageId: this.data.selectedOption >= 0 ? (this.data.selectedOption + 1) : null,
+            amount: amount,
+            paymentMethod: this.data.paymentMethod
+          });
+        } else {
+          // 如果rechargeApi不可用，回退到wordCheckApi
+          console.log('使用wordCheckApi创建订单');
+          return api.createRechargeOrder({
+            amount: amount,
+            paymentMethod: this.data.paymentMethod
+          });
+        }
+      } catch (err) {
+        console.error('创建订单出现异常:', err);
+        // 回退到wordCheckApi
+        return api.createRechargeOrder({
+          amount: amount,
+          paymentMethod: this.data.paymentMethod
+        });
+      }
+    };
+    
+    // 创建充值订单
+    createOrder()
       .then(res => {
-        // 调用微信支付接口
-        wx.requestPayment({
+        wx.hideLoading();
+        console.log('创建订单成功，准备调起支付:', res);
+        
+        // 检查返回的支付参数
+        if (!res.timeStamp || !res.nonceStr || !res.package || !res.signType || !res.paySign) {
+          console.error('支付参数不完整:', res);
+          throw new Error('支付参数不完整');
+        }
+        
+        console.log('微信支付参数:', {
           timeStamp: res.timeStamp,
           nonceStr: res.nonceStr,
           package: res.package,
           signType: res.signType,
           paySign: res.paySign,
-          success: () => {
-            // 支付成功
-            wx.showToast({
-              title: '充值成功',
-              icon: 'success'
-            });
-            
-            // 更新积分状态
-            app.globalData.pointsChanged = true;
-            this.getUserPoints();
-            
-            // 延迟返回上一页
-            setTimeout(() => {
-              wx.navigateBack();
-            }, 1500);
-          },
-          fail: (err) => {
-            if (err.errMsg.indexOf('cancel') !== -1) {
-              wx.showToast({
-                title: '支付已取消',
-                icon: 'none'
-              });
-            } else {
-              wx.showToast({
-                title: '支付失败，请重试',
-                icon: 'none'
-              });
+        });
+        
+        // 调用微信支付接口
+        return new Promise((resolve, reject) => {
+          wx.requestPayment({
+            timeStamp: res.timeStamp,
+            nonceStr: res.nonceStr,
+            package: res.package,
+            signType: res.signType,
+            paySign: res.paySign,
+            success: (payResult) => {
+              console.log('微信支付成功:', payResult);
+              resolve(payResult);
+            },
+            fail: (err) => {
+              console.error('微信支付失败:', err);
+              
+              // 检查特定的错误类型并提供更具体的错误信息
+              if (err.errMsg) {
+                if (err.errMsg.includes('cancel')) {
+                  console.log('用户取消了支付');
+                  err.isCancelled = true;
+                } else if (err.errMsg.includes('requestPayment:fail')) {
+                  if (err.errMsg.includes('appid not exist')) {
+                    console.error('支付失败: appid不存在或错误');
+                  } else if (err.errMsg.includes('jsapi_pay not enabled')) {
+                    console.error('支付失败: 未开通JSAPI支付权限');
+                  } else if (err.errMsg.includes('invalid signature')) {
+                    console.error('支付失败: 签名验证失败');
+                  } else if (err.errMsg.includes('out_trade_no exists')) {
+                    console.error('支付失败: 商户订单号重复');
+                  }
+                }
+              }
+              
+              reject(err);
             }
-          },
-          complete: () => {
-            this.setData({ isProcessing: false });
-          }
+          });
         });
       })
-      .catch(err => {
-        console.error('创建订单失败', err);
+      .then(() => {
+        // 支付成功
         wx.showToast({
-          title: err.message || '创建订单失败，请重试',
-          icon: 'none'
+          title: '充值成功',
+          icon: 'success'
         });
+        
+        // 更新积分状态
+        app.globalData.pointsChanged = true;
+        this.getUserPoints();
+        
+        // 延迟返回上一页
+        setTimeout(() => {
+          wx.navigateBack();
+        }, 1500);
+      })
+      .catch(err => {
+        console.error('充值失败:', err);
+        
+        // 区分支付取消和其他错误
+        if (err.isCancelled || (err.errMsg && err.errMsg.indexOf('cancel') !== -1)) {
+          wx.showToast({
+            title: '支付已取消',
+            icon: 'none'
+          });
+        } else {
+          // 不同类型的错误显示不同的提示
+          let errorMsg = err.message || '充值失败，请重试';
+          if (err.errMsg) {
+            if (err.errMsg.includes('appid not exist')) {
+              errorMsg = 'AppID配置错误';
+            } else if (err.errMsg.includes('jsapi_pay not enabled')) {
+              errorMsg = '支付权限未开通';
+            } else if (err.errMsg.includes('invalid signature')) {
+              errorMsg = '签名验证失败';
+            }
+          }
+          
+          wx.showToast({
+            title: errorMsg,
+            icon: 'none'
+          });
+        }
+      })
+      .finally(() => {
         this.setData({ isProcessing: false });
+        wx.hideLoading();
       });
   }
 }); 

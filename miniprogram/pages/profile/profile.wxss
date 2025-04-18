@@ -28,6 +28,9 @@
   height: 130rpx;
   border-radius: 65rpx;
   border: 4rpx solid #fff;
+  background-color: #f1f1f1;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.2);
+  overflow: hidden;
 }
 
 .user-details {
