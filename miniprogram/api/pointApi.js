@@ -1,5 +1,6 @@
 // pointApi.js
 const app = getApp();
+const config = require('../config/config.js');
 
 /**
  * 处理后端API返回结果的通用方法
@@ -69,29 +70,37 @@ function getAuthHeader() {
 
 /**
  * 获取用户积分信息
- * @returns {Promise} 返回用户积分信息的Promise
+ * @returns {Promise} 返回用户积分的Promise
  */
 function getUserPoints() {
-  console.log('[pointApi] getUserPoints 函数被调用');
-  
   return new Promise((resolve, reject) => {
-    // 检查token是否存在
-    const authHeader = getAuthHeader();
-    if (!authHeader) {
-      console.error('获取积分信息失败: 未登录或Token不存在');
-      reject(new Error('未登录或Token不存在'));
-      return;
+    // 检查用户是否登录
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      console.log('[pointApi] 用户未登录，无法获取积分');
+      return reject({
+        code: 401,
+        message: '用户未登录，请先登录'
+      });
     }
     
-    const url = app.globalData.baseUrl + '/api/v1/points';
-    console.log('请求URL:', url);
-    console.log('请求头:', { 'Authorization': authHeader });
+    // 获取APP实例，用于获取基础URL
+    const app = getApp();
+    
+    // 检查API基础URL
+    if (!app || !app.globalData || !app.globalData.baseUrl) {
+      console.warn('[pointApi] 无法获取API基础URL，使用配置文件默认值');
+    }
+    
+    // 使用配置文件中的URL
+    const url = config.apiBaseUrl + '/points';
+    console.log('[pointApi] 请求积分URL:', url);
     
     wx.request({
       url: url,
       method: 'GET',
       header: {
-        'Authorization': authHeader
+        'Authorization': 'Bearer ' + token
       },
       success: (res) => {
         console.log('获取积分API响应:', res);
@@ -126,7 +135,7 @@ function getPointsRecords(params = {}) {
 
   return new Promise((resolve, reject) => {
     wx.request({
-      url: app.globalData.baseUrl + '/api/v1/points/records',
+      url: config.apiBaseUrl + '/points/records',
       method: 'GET',
       data: {
         page,

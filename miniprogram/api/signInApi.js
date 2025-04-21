@@ -145,7 +145,7 @@ function signIn() {
     console.log('发起签到请求');
     
     createTimeoutRequest({
-      url: `${config.apiBaseUrl}/api/v1/sign-in`,
+      url: `${config.apiBaseUrl}/sign-in`,
       method: 'POST',
       data: {},
       header: {
@@ -182,7 +182,7 @@ function getSignInStatus() {
     console.log('获取签到状态');
     
     createTimeoutRequest({
-      url: `${config.apiBaseUrl}/api/v1/sign-in/status`,
+      url: `${config.apiBaseUrl}/sign-in/status`,
       method: 'GET',
       header: {
         'Authorization': 'Bearer ' + token

@@ -436,7 +436,7 @@ const executeLoginWithRetry = function(code, retryCount = 0) {
     };
     
     wx.request({
-      url: `${config.apiBaseUrl}/api/v1/auth/wx-login`,
+      url: `${config.apiBaseUrl}/auth/wx-login`,
       method: 'POST',
       data: requestData,
       timeout: timeout,
@@ -734,7 +734,7 @@ const userApi = {
       
       // 发送请求验证token
     wx.request({
-        url: `${config.apiBaseUrl}/api/v1/user/check-token`,
+        url: `${config.apiBaseUrl}/user/check-token`,
       method: 'GET',
       header: {
           'auth': token
@@ -785,7 +785,7 @@ const userApi = {
       CodeManager.markAsPending(code);
     
     wx.request({
-        url: `${config.apiBaseUrl}/api/v1/auth/wx-login`,
+        url: `${config.apiBaseUrl}/auth/wx-login`,
       method: 'POST',
         timeout: 15000, // 增加超时时间到15秒
       header: {
@@ -1101,7 +1101,7 @@ const userApi = {
     const executeWithRetry = (retryCount = 0) => {
       return new Promise((resolve, reject) => {
     wx.request({
-          url: `${config.apiBaseUrl}/api/v1/user/bind-phone`,
+          url: `${config.apiBaseUrl}/user/bind-phone`,
       method: 'POST',
           timeout: 10000, // 设置10秒超时
       header: {
@@ -1205,7 +1205,7 @@ const userApi = {
         });
       }
       
-      const requestUrl = `${config.apiBaseUrl}/api/v1/user`;
+      const requestUrl = `${config.apiBaseUrl}/user`;
       const requestHeaders = {
         'content-type': 'application/json',
         'Authorization': 'Bearer ' + token

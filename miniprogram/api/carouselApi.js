@@ -110,7 +110,7 @@ function getCarouselList(useCache = true, timeout = 10000) {
     
     // 发起请求
     const requestTask = wx.request({
-      url: `${config.apiBaseUrl}/api/v1/carousels`,
+      url: `${config.apiBaseUrl}/carousels`,
       method: 'GET',
       header: {
         'Authorization': authorization
@@ -226,7 +226,7 @@ function recordView(id) {
   return new Promise((resolve) => {
     // 使用异步方式，不阻塞主流程
     wx.request({
-      url: `${config.apiBaseUrl}/api/v1/carousels/${id}/view`,
+      url: `${config.apiBaseUrl}/carousels/${id}/view`,
       method: 'GET',
       header: {
         'Authorization': authorization
@@ -267,7 +267,7 @@ function recordClick(id) {
   return new Promise((resolve) => {
     // 使用异步方式，不阻塞主流程
     wx.request({
-      url: `${config.apiBaseUrl}/api/v1/carousels/${id}/click`,
+      url: `${config.apiBaseUrl}/carousels/${id}/click`,
       method: 'GET',
       header: {
         'Authorization': authorization

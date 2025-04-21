@@ -23,6 +23,13 @@ App({
    * 应用启动时的处理
    */
   onLaunch: function() {
+    const config = require('./config/config.js');
+    console.log('小程序启动，config:', config);
+    
+    // 同步配置中的API基础URL
+    this.globalData.baseUrl = config.apiBaseUrl;
+    console.log('设置baseUrl:', this.globalData.baseUrl);
+    
     console.log('应用启动');
     
     // 处理图片加载错误
@@ -151,7 +158,7 @@ App({
       
       // 使用token访问需要认证的接口，验证token是否有效
       wx.request({
-        url: this.globalData.baseUrl + '/api/v1/user',
+        url: this.globalData.baseUrl + '/user',
         method: 'GET',
         header: {
           'Authorization': token.startsWith('Bearer ') ? token : 'Bearer ' + token

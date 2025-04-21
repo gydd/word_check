@@ -4,7 +4,7 @@
 
 module.exports = {
   // API基础URL，与app.js中保持一致
-  apiBaseUrl: 'http://127.0.0.1:8080',
+  apiBaseUrl: 'http://127.0.0.1:8080/api/v1',
   
   // 版本号
   version: '1.0.0',

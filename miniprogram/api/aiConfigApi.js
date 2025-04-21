@@ -67,7 +67,7 @@ function getAvailableModels() {
 
     // 尝试获取可能的工作API路径
     const workingApiPath = wx.getStorageSync('working_api_path');
-    const apiUrl = workingApiPath || `${config.apiBaseUrl}/api/v1/ai-models`;
+    const apiUrl = workingApiPath || `${config.apiBaseUrl}/ai-models`;
 
     console.log('[aiConfigApi] 请求AI模型列表:', apiUrl);
 
@@ -182,9 +182,7 @@ function checkEssay(params) {
     console.log('[aiConfigApi] 开始调用checkEssay, 参数:', params);
     
     // 开发模式：如果启用，则返回模拟数据而不实际调用API
-    const isDevMode = false; // 修改为false以使用实际API
-    // 也可以从配置或缓存读取
-    // const isDevMode = wx.getStorageSync('use_mock_api') === 'true';
+    const isDevMode = false; // 确保设置为false以使用实际API
     
     if (isDevMode) {
       console.log('[aiConfigApi] 开发模式已启用，返回模拟数据');
@@ -227,14 +225,14 @@ function checkEssay(params) {
       return;
     }
     
-    console.log('[aiConfigApi] 发送HTTP请求到后端:', `${config.apiBaseUrl}/api/v1/ai-models/check-essay`);
+    console.log('[aiConfigApi] 发送HTTP请求到后端:', `${config.apiBaseUrl}/ai-models/check-essay`);
     
     wx.request({
-      url: `${config.apiBaseUrl}/api/v1/ai-models/check-essay`,
+      url: `${config.apiBaseUrl}/ai-models/check-essay`,
       method: 'POST',
-      data: params,
+      data: params, // 不需要stringify，wx.request会自动处理
       header: {
-        'Authorization': token ? ('Bearer ' + token) : '',
+        'Authorization': token ? `Bearer ${token}` : '',
         'Content-Type': 'application/json'
       },
       success: (res) => {
@@ -242,78 +240,66 @@ function checkEssay(params) {
         
         if (res.statusCode === 200) {
           const data = res.data;
-          if (data.code === 200 || data.error === 0) {
+          if (data.error === 0) {
+            // 按照标准接口格式处理成功响应
             resolve({
               success: true,
-              data: data.data || data.body || {}
+              data: data.body || {}
             });
-          } else if (data.code === 401 || data.error === 401) {
+          } else if (data.error === 401) {
             // 需要登录
-            console.warn('[aiConfigApi] 返回401未授权错误，可能需要登录');
-            if (app.clearLoginInfo) {
-              app.clearLoginInfo();
-            }
+            console.warn('[aiConfigApi] 返回401未授权错误，需要重新登录');
+            // 清除可能过期的登录信息
+            wx.removeStorageSync('token');
             
-            // 在开发模式下，不跳转到登录页面，而是返回模拟数据
-            if (isDevMode) {
-              console.log('[aiConfigApi] 开发模式下401错误，返回模拟数据');
-              setTimeout(() => {
-                resolve({
-                  success: true,
-                  data: {
-                    evaluation: `[开发模式-未登录] 这是一篇批改结果示例。原文长度：${params.content ? params.content.length : 0}字。\n\n评分：80分`
-                  }
-                });
-              }, 500);
-            } else {
-              wx.navigateTo({
-                url: '/pages/login/login'
-              });
-              reject(new Error('登录已过期，请重新登录'));
-            }
-          } else {
-            console.warn('[aiConfigApi] 返回其他错误码:', data.code || data.error);
-            resolve({
-              success: false,
-              message: data.message || '作文批改失败'
-            });
-          }
-        } else {
-          console.error('[aiConfigApi] 请求状态码异常:', res.statusCode);
-          
-          // 在开发模式下，即使状态码异常也返回模拟数据
-          if (isDevMode) {
-            console.log('[aiConfigApi] 开发模式下状态码异常，返回模拟数据');
-            setTimeout(() => {
-              resolve({
-                success: true,
-                data: {
-                  evaluation: `[开发模式-状态码${res.statusCode}] 这是一篇批改结果示例。原文长度：${params.content ? params.content.length : 0}字。\n\n评分：75分`
+            wx.showModal({
+              title: '登录已过期',
+              content: '您的登录状态已失效，请重新登录',
+              confirmText: '去登录',
+              success(res) {
+                if (res.confirm) {
+                  wx.navigateTo({
+                    url: '/pages/login/login'
+                  });
                 }
-              });
-            }, 500);
+              }
+            });
+            
+            reject(new Error('登录已过期，请重新登录'));
           } else {
-            reject(new Error(`请求失败(${res.statusCode})`));
+            // 处理业务异常
+            console.warn('[aiConfigApi] 返回业务错误:', data.error, data.message);
+            reject(new Error(data.message || '作文批改失败'));
           }
+        } else if (res.statusCode === 401) {
+          // 处理401未授权错误
+          console.error('[aiConfigApi] 未授权错误(401)');
+          // 清除可能过期的登录信息
+          wx.removeStorageSync('token');
+          
+          wx.showModal({
+            title: '登录已过期',
+            content: '您的登录状态已失效，请重新登录',
+            confirmText: '去登录',
+            success(res) {
+              if (res.confirm) {
+                wx.navigateTo({
+                  url: '/pages/login/login'
+                });
+              }
+            }
+          });
+          
+          reject(new Error('登录已过期，请重新登录'));
+        } else {
+          // 处理其他HTTP错误
+          console.error('[aiConfigApi] 请求状态码异常:', res.statusCode);
+          reject(new Error(`请求失败(${res.statusCode})`));
         }
       },
       fail: (err) => {
         console.error('[aiConfigApi] 作文批改请求失败:', err);
-        
-        // 在开发模式下，即使请求失败也返回模拟数据
-        if (isDevMode) {
-          console.log('[aiConfigApi] 开发模式下请求失败，返回模拟数据');
-          setTimeout(() => {
-            resolve({
-              success: true,
-              data: {
-                evaluation: `[开发模式-网络错误] 这是一篇批改结果示例。原文长度：${params.content ? params.content.length : 0}字。\n\n评分：70分`
-              }
-            });
-          }, 500);
-        } else {
-          reject(err);
-        }
+        reject(err);
       }
     });
   });
@@ -324,7 +310,7 @@ function debugAIModels() {
   const token = wx.getStorageSync('token');
   
   wx.request({
-    url: `${config.apiBaseUrl}/api/v1/ai-models`,
+    url: `${config.apiBaseUrl}/ai-models`,
     method: 'GET',
     header: {
       'Authorization': `Bearer ${token}`

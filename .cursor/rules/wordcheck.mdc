@@ -3,32 +3,47 @@ description:
 globs: 
 alwaysApply: true
 ---
+# 微信小程序开发规范
 
-# Your rule content
+## 项目结构
+- `components`: 自定义组件，每个组件单独一个文件夹，[miniprogram/components](mdc:miniprogram/components)
+- `pages`: 小程序页面，每个页面单独一个文件夹，[miniprogram/pages](mdc:miniprogram/pages)
+- `api`: 调用后端服务的文件，按模块划分，每个模块一个文件，文件命名：**Api.js，[miniprogram/api](mdc:miniprogram/api)
+- `static`: 存放其他常用js或静态资源图片，[miniprogram/static](mdc:miniprogram/static)
+- `utils`: 工具函数，[miniprogram/utils](mdc:miniprogram/utils)
+- `config`: 配置文件，[miniprogram/config](mdc:miniprogram/config)
+- `models`: 数据模型，[miniprogram/models](mdc:miniprogram/models)
 
-你是一个经验丰富的小程序开发人员，擅长解决各种小程序开发问题，严格遵守小程序开发规范
-项目结构
-- components
-  /**这里存放小程序的自定义组件，每个组件单独一个文件夹 */
-- pages
- /**这里存放小程序的页面，每个页面单独一个文件夹 */
-- api
-/** 这里存放调用后端服务的文件，按模块划分，每个模块一个文件,文件命名：**Api.js */
-- static
-/**存放其他常用js或者静态资源图片 */
-ui及页面规范
-- 所有页面必须包含 js、json、wxml、wxss文件，json文件必须包含以下基本内容
+## 页面列表
+- 首页：[miniprogram/pages/home](mdc:miniprogram/pages/home)
+- 登录：[miniprogram/pages/login](mdc:miniprogram/pages/login)
+- 积分：[miniprogram/pages/points](mdc:miniprogram/pages/points)
+- 个人资料：[miniprogram/pages/profile](mdc:miniprogram/pages/profile)
+- 充值：[miniprogram/pages/recharge](mdc:miniprogram/pages/recharge)
+- 结果：[miniprogram/pages/result](mdc:miniprogram/pages/result)
+- 上传：[miniprogram/pages/upload](mdc:miniprogram/pages/upload)
+- 网页视图：[miniprogram/pages/webview](mdc:miniprogram/pages/webview)
+
+## UI及页面规范
+- 所有页面必须包含 js、json、wxml、wxss 文件
+- json 文件必须包含基本内容:
+```json
 {
-  "navigationBarTitleText": "上传作文",
+  "navigationBarTitleText": "页面标题",
   "usingComponents": {
   }
 }
- 
-代码规范：
-    - 使用微信小程序原生框架进行开发，合理使用组件化开发。
-    - 遵循微信小程序设计规范，确保良好的用户体验。
-    - 利用微信小程序提供的API进行功能开发，如登录、支付、地理位置等。
-    - 使用分包加载优化小程序体积和加载性能。
-    - 合理使用页面生命周期函数和组件生命周期函数。
-    - 编写详细的代码注释，并在代码中添加必要的错误处理和日志记录。
-    - 合理使用本地存储和缓存机制。
+```
+
+## 小程序配置
+- 全局配置：[app.json](mdc:app.json)
+- 项目配置：[project.config.json](mdc:project.config.json)
+
+## 代码规范
+1. 使用微信小程序原生框架进行开发，合理使用组件化开发
+2. 遵循微信小程序设计规范，确保良好的用户体验
+3. 利用微信小程序提供的API进行功能开发，如登录、支付等
+4. 使用分包加载优化小程序体积和加载性能
+5. 合理使用页面生命周期函数和组件生命周期函数
+6. 编写详细的代码注释，并添加必要的错误处理和日志记录
+7. 合理使用本地存储和缓存机制

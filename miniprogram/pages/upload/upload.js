@@ -446,12 +446,12 @@ Page({
     
     // 生成测试URL列表
     const testUrls = [
-      `${baseUrl}/api/v1/essay/check`,
-      `${baseUrl}/api/v1/essays/check`, 
-      `${baseUrl}/api/v1/word/check`,
-      `${baseUrl}/api/v1/check`,
-      `${baseUrl}/api/v1/check/essay`,
-      `${baseUrl}/api/v1/ai-models/check-essay`
+      `${baseUrl}/essay/check`,
+      `${baseUrl}/essays/check`, 
+      `${baseUrl}/word/check`,
+      `${baseUrl}/check`,
+      `${baseUrl}/check/essay`,
+      `${baseUrl}/ai-models/check-essay`
     ];
     
     console.log('[upload.js] 开始API诊断, 测试URL:', testUrls);
@@ -715,102 +715,111 @@ Page({
     
     console.log('[upload.js] submitCheck被调用, 开发模式:', isDevMode);
     
-    // 在正常模式下，检查是否满足提交条件
-    if (!isDevMode && !this.canSubmit()) {
-      console.log('[upload.js] submitCheck: canSubmit() 返回 false，阻止提交');
-      // 根据不同情况给出不同提示
-      let reason = '未知原因';
-      if (!this.data.textContent && this.data.currentTab === 'text') {
-        reason = '请输入文本内容';
-      } else if (!this.data.file && this.data.currentTab === 'file') {
-        reason = '请先选择文件';
-      } else if (!this.data.selectedModelId) {
-        reason = '请选择AI模型';
-      } else if (this.data.userPoints < this.data.checkCost) {
-        reason = '积分不足';
-        // 显示积分不足的弹窗
-        wx.showModal({
-          title: '积分不足',
-          content: `当前积分${this.data.userPoints}分，本次检测需要${this.data.checkCost}分，是否前往充值？`,
-          confirmText: '去充值',
-          cancelText: '取消',
-          success: (res) => {
-            if (res.confirm) {
-              wx.navigateTo({
-                url: '/pages/points/points'
-              });
+    // 先刷新登录状态
+    this.refreshUserLogin().then(() => {
+      // 在正常模式下，检查是否满足提交条件
+      if (!isDevMode && !this.canSubmit()) {
+        console.log('[upload.js] submitCheck: canSubmit() 返回 false，阻止提交');
+        // 根据不同情况给出不同提示
+        let reason = '未知原因';
+        if (!this.data.textContent && this.data.currentTab === 'text') {
+          reason = '请输入文本内容';
+        } else if (!this.data.file && this.data.currentTab === 'file') {
+          reason = '请先选择文件';
+        } else if (!this.data.selectedModelId) {
+          reason = '请选择AI模型';
+        } else if (this.data.userPoints < this.data.checkCost) {
+          reason = '积分不足';
+          // 显示积分不足的弹窗
+          wx.showModal({
+            title: '积分不足',
+            content: `当前积分${this.data.userPoints}分，本次检测需要${this.data.checkCost}分，是否前往充值？`,
+            confirmText: '去充值',
+            cancelText: '取消',
+            success: (res) => {
+              if (res.confirm) {
+                wx.navigateTo({
+                  url: '/pages/points/points'
+                });
+              }
             }
-          }
-        });
-        // 积分不足时，直接返回，避免显示下面的通用提示
-        return; 
-      } else if (this.data.isSubmitting) {
-        reason = '正在处理中，请稍候';
-      } else if (!wx.getStorageSync('token') || !getApp().globalData.userInfo) {
-        reason = '用户未登录或登录信息不完整';
-        // 提示用户登录
-         wx.showModal({
-          title: '请先登录',
-          content: '您需要登录后才能使用检测功能。',
-          confirmText: '去登录',
-          cancelText: '取消',
-          success: (res) => {
-            if (res.confirm) {
-              wx.navigateTo({ url: '/pages/login/login' });
+          });
+          // 积分不足时，直接返回，避免显示下面的通用提示
+          return; 
+        } else if (this.data.isSubmitting) {
+          reason = '正在处理中，请稍候';
+        } else if (!wx.getStorageSync('token') || !getApp().globalData.userInfo) {
+          reason = '用户未登录或登录信息不完整';
+          // 提示用户登录
+           wx.showModal({
+            title: '请先登录',
+            content: '您需要登录后才能使用检测功能。',
+            confirmText: '去登录',
+            cancelText: '取消',
+            success: (res) => {
+              if (res.confirm) {
+                wx.navigateTo({ url: '/pages/login/login' });
+              }
             }
-          }
+          });
+          return; // 未登录时直接返回
+        }
+        
+        // 显示一个通用的禁用提示
+        wx.showToast({
+          title: `无法提交: ${reason}`,
+          icon: 'none',
+          duration: 2000
         });
-        return; // 未登录时直接返回
+        console.log('[upload.js] 无法提交，原因:', reason);
+        return;
       }
       
-      // 显示一个通用的禁用提示
-      wx.showToast({
-        title: `无法提交: ${reason}`,
-        icon: 'none',
-        duration: 2000
+      // 所有模式下的基本检查
+      if (this.data.currentTab === 'text' && (!this.data.textContent || this.data.textContent.trim().length === 0)) {
+        wx.showToast({
+          title: '请输入文本内容',
+          icon: 'none'
+        });
+        this.setData({ isSubmitting: false });
+        return;
+      }
+      if (this.data.currentTab === 'file' && !this.data.file) {
+        wx.showToast({
+          title: '请先选择文件',
+          icon: 'none'
+        });
+        this.setData({ isSubmitting: false });
+        return;
+      }
+      
+      // 设置提交状态
+      self.setData({
+        isSubmitting: true
       });
-      console.log('[upload.js] 无法提交，原因:', reason);
-      return;
-    }
-    
-    // 所有模式下的基本检查
-    if (this.data.currentTab === 'text' && (!this.data.textContent || this.data.textContent.trim().length === 0)) {
-      wx.showToast({
-        title: '请输入文本内容',
-        icon: 'none'
+      
+      // 显示加载提示
+      wx.showLoading({
+        title: '正在提交...',
+        mask: true
       });
-      return;
-    }
-    if (this.data.currentTab === 'file' && !this.data.file) {
-      wx.showToast({
-        title: '请先选择文件',
-        icon: 'none'
-      });
-      return;
-    }
-    
-    // 设置提交状态
-    self.setData({
-      isSubmitting: true
+      
+      console.log('[upload.js] 调试信息 - 用户积分:', self.data.userPoints);
+      console.log('[upload.js] 调试信息 - 检测费用:', self.data.checkCost);
+      console.log('[upload.js] 调试信息 - 当前标签:', self.data.currentTab);
+      console.log('[upload.js] 调试信息 - 已选模型:', self.data.selectedModelId);
+      
+      // 根据当前标签选择相应的提交方法
+      if (self.data.currentTab === 'text') {
+        self.handleTextSubmit();
+      } else {
+        self.handleFileSubmit();
+      }
+    }).catch(err => {
+      console.error('[upload.js] 刷新用户登录状态失败:', err);
+      // 登录失败了，不继续提交
+      this.setData({ isSubmitting: false });
     });
-    
-    // 显示加载提示
-    wx.showLoading({
-      title: '正在提交...',
-      mask: true
-    });
-    
-    console.log('[upload.js] 调试信息 - 用户积分:', self.data.userPoints);
-    console.log('[upload.js] 调试信息 - 检测费用:', self.data.checkCost);
-    console.log('[upload.js] 调试信息 - 当前标签:', self.data.currentTab);
-    console.log('[upload.js] 调试信息 - 已选模型:', self.data.selectedModelId);
-    
-    // 根据当前标签选择相应的提交方法
-    if (self.data.currentTab === 'text') {
-      self.handleTextSubmit();
-    } else {
-      self.handleFileSubmit();
-    }
   },
 
   /**
@@ -856,26 +865,64 @@ Page({
    * 提交内容进行检测
    */
   submitForCheck: function() {
+    const self = this;
     console.log('[upload.js] 开始提交检测，选中的模型ID:', this.data.selectedModelId);
     console.log('[upload.js] 文本内容长度:', this.data.textContent ? this.data.textContent.length : 0);
     
+    // 检查登录状态
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      wx.showModal({
+        title: '未登录',
+        content: '请先登录后再提交检测',
+        confirmText: '去登录',
+        success(res) {
+          if (res.confirm) {
+            wx.navigateTo({
+              url: '/pages/login/login'
+            });
+          }
+        }
+      });
+      return;
+    }
+    
     // 隐藏可能的前一个错误提示
-    this.setData({ errorMsg: '' });
+    this.setData({ errorMsg: '', isSubmitting: true });
+    
+    // 显示加载提示
+    wx.showLoading({
+      title: '提交中...',
+      mask: true
+    });
     
     // 检查内容是否为空
     if (!this.data.textContent || this.data.textContent.trim() === '') {
-      this.setData({ errorMsg: '请输入要检测的内容' });
+      wx.hideLoading();
+      this.setData({ 
+        errorMsg: '请输入要检测的内容',
+        isSubmitting: false 
+      });
+      wx.showToast({
+        title: '请输入要检测的内容',
+        icon: 'none'
+      });
       return;
     }
     
     // 检查是否选择了模型
     if (!this.data.selectedModelId) {
-      this.setData({ errorMsg: '请选择一个AI模型' });
+      wx.hideLoading();
+      this.setData({ 
+        errorMsg: '请选择一个AI模型',
+        isSubmitting: false 
+      });
+      wx.showToast({
+        title: '请选择一个AI模型',
+        icon: 'none'
+      });
       return;
     }
-    
-    // 设置加载状态
-    this.setData({ isSubmitting: true });
     
     // 调用API进行检测
     const aiConfigApi = require('../../api/aiConfigApi');
@@ -883,6 +930,7 @@ Page({
       content: this.data.textContent,
       modelId: this.data.selectedModelId
     }).then(res => {
+      wx.hideLoading();
       console.log('[upload.js] 检测成功:', res);
       
       // 扣除用户积分
@@ -892,15 +940,16 @@ Page({
       const resultData = {
         content: this.data.textContent,
         result: res.data,
-        modelInfo: res.data.modelInfo || null,
+        modelInfo: this.getSelectedModelInfo(),
         timestamp: new Date().getTime()
       };
       
       // 保存结果并跳转
       this.saveAndNavigateToResult(resultData);
     }).catch(err => {
+      wx.hideLoading();
       console.error('[upload.js] 检测失败:', err);
-      let errorMessage = '检测失败';
+      let errorMessage = '检测失败，请重试';
       
       if (err && err.message) {
         errorMessage = err.message;
@@ -913,11 +962,32 @@ Page({
       
       wx.showToast({
         title: errorMessage,
-        icon: 'none'
+        icon: 'none',
+        duration: 2000
       });
     });
   },
   
+  /**
+   * 获取当前选中的模型信息
+   */
+  getSelectedModelInfo: function() {
+    const selectedId = this.data.selectedModelId;
+    const models = this.data.modelConfigs || [];
+    
+    for (let i = 0; i < models.length; i++) {
+      if (models[i].id === selectedId) {
+        return {
+          id: models[i].id,
+          name: models[i].name,
+          provider: models[i].provider
+        };
+      }
+    }
+    
+    return null;
+  },
+
   /**
    * 更新用户积分信息
    */
@@ -1330,5 +1400,76 @@ Page({
       });
       this.setData({ isSubmitting: false });
     }
+  },
+
+  /**
+   * 刷新用户登录状态
+   * @returns {Promise} 返回Promise对象
+   */
+  refreshUserLogin: function() {
+    return new Promise((resolve, reject) => {
+      const token = wx.getStorageSync('token');
+      const app = getApp();
+      const userInfo = app.globalData.userInfo || wx.getStorageSync('userInfo');
+      
+      // 检查是否已登录
+      if (!token) {
+        console.log('[upload.js] 未检测到token，请先登录');
+        wx.showModal({
+          title: '请先登录',
+          content: '您需要登录后才能使用检测功能',
+          confirmText: '去登录',
+          cancelText: '取消',
+          success: (res) => {
+            if (res.confirm) {
+              wx.navigateTo({
+                url: '/pages/login/login'
+              });
+            }
+            // 无论用户是否去登录，都算是拒绝了当前操作
+            reject(new Error('用户未登录'));
+          }
+        });
+        return;
+      }
+      
+      // 如果已经有token，尝试获取最新的用户信息
+      const userApi = require('../../api/userApi');
+      userApi.getUserInfo()
+        .then(res => {
+          if (res && res.data) {
+            app.globalData.userInfo = res.data;
+            wx.setStorageSync('userInfo', res.data);
+            console.log('[upload.js] 用户信息刷新成功');
+            resolve();
+          } else {
+            console.warn('[upload.js] 获取用户信息返回为空');
+            resolve(); // 即使获取信息失败，也允许继续操作
+          }
+        })
+        .catch(err => {
+          console.error('[upload.js] 获取用户信息失败:', err);
+          // 如果是401错误，提示重新登录
+          if (err && (err.code === 401 || err.message && err.message.includes('401'))) {
+            wx.removeStorageSync('token');
+            wx.showModal({
+              title: '登录已过期',
+              content: '您的登录状态已失效，请重新登录',
+              confirmText: '去登录',
+              success(res) {
+                if (res.confirm) {
+                  wx.navigateTo({
+                    url: '/pages/login/login'
+                  });
+                }
+              }
+            });
+            reject(new Error('登录已过期'));
+          } else {
+            // 其他错误，仍然允许继续操作
+            resolve();
+          }
+        });
+    });
   },
 }); 

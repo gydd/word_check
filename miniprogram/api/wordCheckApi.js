@@ -175,11 +175,11 @@ function checkWord(params) {
   
   // 要尝试的API路径列表，按优先级顺序排列
   const apiPaths = [
-    '/api/v1/essay/check',
-    '/api/v1/essays/check',
-    '/api/v1/word/check',
-    '/api/v1/check',
-    '/api/v1/check/essay'
+    '/essay/check',
+    '/essays/check',
+    '/word/check',
+    '/check',
+    '/check/essay'
   ];
   
   // 递归尝试不同的API路径
@@ -939,11 +939,11 @@ function diagnoseApiPaths() {
   
   // 要测试的API路径列表
   const apiPaths = [
-    '/api/v1/essay/check',
-    '/api/v1/essays/check',
-    '/api/v1/word/check',
-    '/api/v1/check',
-    '/api/v1/check/essay'
+    '/essay/check',
+    '/essays/check',
+    '/word/check',
+    '/check',
+    '/check/essay'
   ];
   
   const results = {};
