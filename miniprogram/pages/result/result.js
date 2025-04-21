@@ -56,6 +56,18 @@ Page({
 
     console.log(`[result.js] 开始加载结果，ID: ${resultId}`);
     
+    // 首先尝试从本地存储获取结果
+    const localResult = wx.getStorageSync('checkResult_' + resultId) || 
+                        wx.getStorageSync('checkResult');
+    
+    if (localResult) {
+      console.log('[result.js] 从本地存储获取结果成功:', localResult);
+      
+      // 处理结果数据
+      this.processResultData(localResult);
+      return;
+    }
+    
     // 检查是否是模拟模式的结果ID
     if (resultId.startsWith('mock_')) {
       console.log(`[result.js] 检测到模拟结果ID: ${resultId}`);
@@ -65,15 +77,8 @@ Page({
       if (mockResult) {
         console.log('[result.js] 从本地存储获取模拟结果成功:', mockResult);
         
-        // 格式化时间
-        if (mockResult.createdAt) {
-          mockResult.checkTime = util.formatTime(new Date(mockResult.createdAt));
-        }
-        
-        this.setData({
-          result: mockResult,
-          loading: false
-        });
+        // 处理结果数据
+        this.processResultData(mockResult);
         return;
       } else {
         console.error('[result.js] 未找到模拟结果数据');
@@ -81,45 +86,25 @@ Page({
       }
     }
 
+    // 如果本地存储没有找到，则调用API获取
     api.getCheckResult(resultId)
       .then(res => {
-        console.log('[result.js] 获取结果成功:', res);
+        console.log('[result.js] 从API获取结果成功:', res);
         
-        // 格式化时间
-        if (res.checkTime) {
-          res.checkTime = util.formatTime(new Date(res.checkTime));
-        } else if (res.createdAt) {
-          res.checkTime = util.formatTime(new Date(res.createdAt));
-        }
-        
-        this.setData({
-          result: res,
-          loading: false
-        });
+        // 处理结果数据
+        this.processResultData(res);
       })
       .catch(err => {
-        console.error('[result.js] 获取检测结果失败', err);
+        console.error('[result.js] 从API获取检测结果失败', err);
         
-        // 尝试从本地存储直接获取结果（作为备用方案）
-        const backupResult = wx.getStorageSync('mock_check_result_' + resultId) || 
-                            wx.getStorageSync('essay_check_result');
+        // 再次尝试从本地存储获取可能的数据
+        const fallbackResult = wx.getStorageSync('checkResult');
         
-        if (backupResult) {
-          console.log('[result.js] 从本地存储获取备用结果:', backupResult);
+        if (fallbackResult) {
+          console.log('[result.js] 从本地存储获取备用结果:', fallbackResult);
           
-          // 格式化时间
-          if (backupResult.createdAt) {
-            backupResult.checkTime = util.formatTime(new Date(backupResult.createdAt));
-          } else {
-            backupResult.checkTime = util.formatTime(new Date());
-          }
-          
-          this.setData({
-            result: backupResult,
-            loading: false,
-            hasError: false,
-            errorMsg: ''
-          });
+          // 处理结果数据
+          this.processResultData(fallbackResult);
         } else {
           // 真的没有找到任何结果，显示错误
           this.setData({
@@ -147,6 +132,60 @@ Page({
           });
         }
       });
+  },
+  
+  /**
+   * 处理结果数据
+   */
+  processResultData: function(data) {
+    // 处理数据结构
+    let processedResult = data;
+    
+    // 如果数据是嵌套在result字段中的
+    if (data.result) {
+      processedResult = {
+        ...data,
+        ...data.result
+      };
+    }
+    
+    // 确保有文本内容
+    if (!processedResult.textContent && data.content) {
+      processedResult.textContent = data.content;
+    }
+    
+    // 确保有检测时间
+    if (!processedResult.checkTime) {
+      if (processedResult.timestamp) {
+        processedResult.checkTime = util.formatTime(new Date(processedResult.timestamp));
+      } else if (processedResult.createdAt) {
+        processedResult.checkTime = util.formatTime(new Date(processedResult.createdAt));
+      } else {
+        processedResult.checkTime = util.formatTime(new Date());
+      }
+    }
+    
+    // 确保有文本长度
+    if (!processedResult.textLength && processedResult.textContent) {
+      processedResult.textLength = processedResult.textContent.length;
+    }
+    
+    // 确保有status字段
+    if (!processedResult.status) {
+      processedResult.status = 'COMPLETED';
+    }
+    
+    // 确保有issues字段，即使为空
+    if (!processedResult.issues) {
+      processedResult.issues = [];
+    }
+    
+    console.log('[result.js] 处理后的结果数据:', processedResult);
+    
+    this.setData({
+      result: processedResult,
+      loading: false
+    });
   },
 
   /**

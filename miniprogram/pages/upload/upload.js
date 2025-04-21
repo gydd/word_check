@@ -1377,7 +1377,15 @@ Page({
     try {
       console.log('[upload.js] 保存批改结果:', resultData);
       
-      // 保存结果到本地存储
+      // 生成唯一ID
+      const resultId = 'essay_' + new Date().getTime();
+      
+      // 添加ID到结果数据中
+      resultData.id = resultId;
+      
+      // 保存结果到本地存储 - 使用带ID的键名便于后续访问
+      wx.setStorageSync('checkResult_' + resultId, resultData);
+      // 同时也保存到通用键名，兼容旧代码
       wx.setStorageSync('checkResult', resultData);
       
       // 设置提交状态
@@ -1389,7 +1397,7 @@ Page({
       // 延迟跳转，确保状态更新完成
       setTimeout(() => {
         wx.navigateTo({
-          url: '/pages/result/result'
+          url: '/pages/result/result?id=' + resultId
         });
       }, 500);
     } catch (error) {

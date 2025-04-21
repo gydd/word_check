@@ -31,7 +31,7 @@
       <view class="result-summary">
         <view class="summary-item">
           <view class="summary-label">检测类型</view>
-          <view class="summary-value">{{result.checkType || '文本检测'}}</view>
+          <view class="summary-value">{{result.checkType || '作文批改'}}</view>
         </view>
         <view class="summary-item">
           <view class="summary-label">检测时间</view>
@@ -41,38 +41,63 @@
           <view class="summary-label">文本长度</view>
           <view class="summary-value">{{result.textLength || 0}} 字符</view>
         </view>
-        <view class="summary-item">
-          <view class="summary-label">检测结果</view>
-          <view class="summary-value {{result.status === 'PASSED' ? 'pass' : 'fail'}}">
-            {{result.status === 'PASSED' ? '通过' : '未通过'}}
-          </view>
+        <view class="summary-item" wx:if="{{result.score !== undefined}}">
+          <view class="summary-label">评分</view>
+          <view class="summary-value score">{{result.score}}</view>
         </view>
       </view>
 
       <!-- 详细结果 -->
       <view class="result-details">
-        <view class="section-title">详细结果</view>
-        
-        <view class="no-issues" wx:if="{{result.issues.length === 0}}">
-          <text class="iconfont icon-success"></text>
-          <text>恭喜！未发现任何问题</text>
-        </view>
-        
-        <view class="issues-list" wx:else>
-          <view class="issue-item" wx:for="{{result.issues}}" wx:key="index">
-            <view class="issue-header">
-              <view class="issue-type {{item.severity}}">{{item.type}}</view>
-              <view class="issue-location">位置: {{item.location}}</view>
+        <!-- 作文批改结果 -->
+        <block wx:if="{{result.evaluation || result.summary}}">
+          <!-- 摘要信息 -->
+          <view class="section-title">总体评价</view>
+          <view class="summary-content" wx:if="{{result.summary}}">
+            {{result.summary}}
+          </view>
+          
+          <!-- 详细评价 -->
+          <view class="section-title">详细点评</view>
+          <view class="evaluation-content">
+            <text>{{result.evaluation || '无详细点评信息'}}</text>
+          </view>
+          
+          <!-- 建议列表 -->
+          <view class="section-title" wx:if="{{result.suggestions && result.suggestions.length > 0}}">改进建议</view>
+          <view class="suggestions-list" wx:if="{{result.suggestions && result.suggestions.length > 0}}">
+            <view class="suggestion-item" wx:for="{{result.suggestions}}" wx:key="index">
+              <text class="suggestion-bullet">•</text>
+              <text class="suggestion-text">{{item}}</text>
             </view>
-            <view class="issue-content">
-              <view class="issue-text">{{item.text}}</view>
-              <view class="issue-suggestion" wx:if="{{item.suggestion}}">
-                <text class="suggestion-label">建议：</text>
-                <text>{{item.suggestion}}</text>
+          </view>
+        </block>
+
+        <!-- 传统检测结果 -->
+        <block wx:else>
+          <view class="section-title">详细结果</view>
+          
+          <view class="no-issues" wx:if="{{result.issues.length === 0}}">
+            <text class="iconfont icon-success"></text>
+            <text>恭喜！未发现任何问题</text>
+          </view>
+          
+          <view class="issues-list" wx:else>
+            <view class="issue-item" wx:for="{{result.issues}}" wx:key="index">
+              <view class="issue-header">
+                <view class="issue-type {{item.severity}}">{{item.type}}</view>
+                <view class="issue-location">位置: {{item.location}}</view>
+              </view>
+              <view class="issue-content">
+                <view class="issue-text">{{item.text}}</view>
+                <view class="issue-suggestion" wx:if="{{item.suggestion}}">
+                  <text class="suggestion-label">建议：</text>
+                  <text>{{item.suggestion}}</text>
+                </view>
               </view>
             </view>
           </view>
-        </view>
+        </block>
       </view>
 
       <!-- 操作按钮 -->
