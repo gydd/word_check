@@ -198,4 +198,14 @@ public interface PointService {
      * @return 用户等级
      */
     int calculateUserLevel(Integer cumulativePoints);
+    
+    /**
+     * 简化版扣减用户积分方法（针对API调用）
+     *
+     * @param userId 用户ID
+     * @param points 扣减的积分数量
+     * @param reason 扣减原因
+     * @return 更新后的用户积分DTO
+     */
+    PointsDTO deductPoints(Integer userId, Integer points, String reason);
 } 

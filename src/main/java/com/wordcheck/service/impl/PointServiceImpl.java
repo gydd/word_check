@@ -446,10 +446,71 @@ public class PointServiceImpl implements PointService {
         return null;
     }
 
+    /**
+     * 获取用户积分统计信息
+     *
+     * @param userId    用户ID
+     * @param startDate 开始日期（可选）
+     * @param endDate   结束日期（可选）
+     * @return 积分统计信息
+     */
     @Override
     public PointStatisticsVO getUserPointStatistics(Integer userId, String startDate, String endDate) {
-        // 实现获取用户积分统计信息
-        // 暂未实现，返回null
+        // 实现逻辑
         return null;
+    }
+
+    /**
+     * 简化版扣减用户积分方法（针对API调用）
+     *
+     * @param userId 用户ID
+     * @param points 扣减的积分数量
+     * @param reason 扣减原因
+     * @return 更新后的用户积分DTO
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public PointsDTO deductPoints(Integer userId, Integer points, String reason) {
+        logger.info("API扣减用户积分, userId: {}, points: {}, reason: {}", userId, points, reason);
+        
+        if (points <= 0) {
+            throw new IllegalArgumentException("扣减积分数量必须大于0");
+        }
+        
+        // 获取用户积分
+        UserPoint userPoint = getUserPoints(userId);
+        
+        // 如果用户积分不存在，则初始化
+        if (userPoint == null) {
+            userPoint = initUserPoints(userId);
+        }
+        
+        // 检查用户积分是否足够
+        if (userPoint.getCurrentPoints() < points) {
+            throw new IllegalStateException("用户积分不足");
+        }
+        
+        // 调用扣减积分方法
+        UserPoint updatedPoints = deductPoints(
+            userId, 
+            points, 
+            reason, 
+            PointTypeEnum.CONSUMPTION, 
+            PointActionEnum.DEDUCT, 
+            null, 
+            "API", 
+            "API接口扣减"
+        );
+        
+        // 将UserPoint转换为PointsDTO
+        PointsDTO pointsDTO = new PointsDTO();
+        pointsDTO.setCurrentPoints(updatedPoints.getCurrentPoints());
+        pointsDTO.setTotalEarned(updatedPoints.getTotalEarned());
+        pointsDTO.setTotalSpent(updatedPoints.getTotalSpent());
+        pointsDTO.setLevel(updatedPoints.getLevel());
+        pointsDTO.setLevelName(updatedPoints.getLevelName());
+        pointsDTO.setNextLevelPoints(updatedPoints.getNextLevelPoints());
+        
+        return pointsDTO;
     }
 } 

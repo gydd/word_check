@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -137,7 +138,7 @@ public class CarouselController {
      * @param id 轮播图ID
      * @return 操作结果
      */
-    @GetMapping("/{id}/click")
+    @PostMapping("/{id}/click")
     @Operation(
         summary = "记录轮播图点击", 
         description = "记录轮播图被点击的统计数据",
@@ -184,7 +185,7 @@ public class CarouselController {
      * @param id 轮播图ID
      * @return 操作结果
      */
-    @GetMapping("/{id}/view")
+    @PostMapping("/{id}/view")
     @Operation(
         summary = "记录轮播图查看", 
         description = "记录轮播图被查看的统计数据",

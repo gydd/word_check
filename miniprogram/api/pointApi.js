@@ -159,10 +159,56 @@ function getPointsRecords(params = {}) {
   });
 }
 
+/**
+ * 扣减用户积分
+ * @param {Object} params 参数对象
+ * @param {Number} params.points 扣减的积分数量
+ * @param {String} params.reason 扣减原因
+ * @returns {Promise} 返回扣减结果的Promise
+ */
+function deductPoints(params = {}) {
+  console.log('[pointApi] deductPoints 函数被调用', params);
+  
+  const points = params.points || 1;
+  const reason = params.reason || '消费';
+
+  if (points <= 0) {
+    return Promise.reject(new Error('扣减积分数量必须大于0'));
+  }
+
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: config.apiBaseUrl + '/points/deduct',
+      method: 'POST',
+      data: {
+        points,
+        reason
+      },
+      header: {
+        'content-type': 'application/json',
+        'Authorization': getAuthHeader()
+      },
+      success: (res) => {
+        console.log('[pointApi] 扣减积分API响应:', res);
+        handleApiResponse(res, resolve, reject);
+      },
+      fail: (err) => {
+        console.error('[pointApi] 扣减积分请求失败:', err);
+        wx.showToast({
+          title: '网络连接失败',
+          icon: 'none'
+        });
+        reject(err);
+      }
+    });
+  });
+}
+
 // 创建并导出API对象
 const pointApi = {
   getUserPoints,
-  getPointsRecords
+  getPointsRecords,
+  deductPoints
 };
 
 // 添加调试日志
