@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wordcheck.mapper.CheckHistoryMapper">
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.wordcheck.model.CheckHistoryEntity">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="user_id" property="userId" jdbcType="INTEGER"/>
+        <result column="content" property="content" jdbcType="LONGVARCHAR"/>
+        <result column="content_length" property="contentLength" jdbcType="INTEGER"/>
+        <result column="check_type" property="checkType" jdbcType="VARCHAR"/>
+        <result column="model_id" property="modelId" jdbcType="INTEGER"/>
+        <result column="model_name" property="modelName" jdbcType="VARCHAR"/>
+        <result column="check_result" property="checkResult" jdbcType="LONGVARCHAR"/>
+        <result column="score" property="score" jdbcType="INTEGER"/>
+        <result column="points_cost" property="pointsCost" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, user_id, content_length, check_type, model_id, model_name, score, points_cost, create_time, update_time
+    </sql>
+
+    <!-- 所有列 -->
+    <sql id="All_Column_List">
+        id, user_id, content, content_length, check_type, model_id, model_name, check_result, score, points_cost, create_time, update_time
+    </sql>
+
+    <!-- 插入记录 -->
+    <insert id="insert" parameterType="com.wordcheck.model.CheckHistoryEntity">
+        INSERT INTO check_history (
+            id, user_id, content, content_length, check_type, model_id, model_name, 
+            check_result, score, points_cost, create_time, update_time
+        ) VALUES (
+            #{id,jdbcType=VARCHAR}, 
+            #{userId,jdbcType=INTEGER}, 
+            #{content,jdbcType=LONGVARCHAR}, 
+            #{contentLength,jdbcType=INTEGER}, 
+            #{checkType,jdbcType=VARCHAR}, 
+            #{modelId,jdbcType=INTEGER}, 
+            #{modelName,jdbcType=VARCHAR}, 
+            #{checkResult,jdbcType=LONGVARCHAR}, 
+            #{score,jdbcType=INTEGER}, 
+            #{pointsCost,jdbcType=INTEGER}, 
+            #{createTime,jdbcType=TIMESTAMP}, 
+            #{updateTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <!-- 根据ID查询 -->
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT 
+        <include refid="All_Column_List"/>
+        FROM check_history
+        WHERE id = #{id,jdbcType=VARCHAR}
+    </select>
+
+    <!-- 根据用户ID查询列表 -->
+    <select id="findByUserId" resultMap="BaseResultMap">
+        SELECT 
+        <include refid="Base_Column_List"/>
+        FROM check_history
+        WHERE user_id = #{userId,jdbcType=INTEGER}
+        ORDER BY create_time DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 统计用户的记录数 -->
+    <select id="countByUserId" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM check_history
+        WHERE user_id = #{userId,jdbcType=INTEGER}
+    </select>
+
+    <!-- 更新记录 -->
+    <update id="update" parameterType="com.wordcheck.model.CheckHistoryEntity">
+        UPDATE check_history
+        <set>
+            <if test="checkResult != null">
+                check_result = #{checkResult,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="score != null">
+                score = #{score,jdbcType=INTEGER},
+            </if>
+            <if test="pointsCost != null">
+                points_cost = #{pointsCost,jdbcType=INTEGER},
+            </if>
+            update_time = #{updateTime,jdbcType=TIMESTAMP}
+        </set>
+        WHERE id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <!-- 删除记录 -->
+    <delete id="deleteById">
+        DELETE FROM check_history
+        WHERE id = #{id,jdbcType=VARCHAR}
+    </delete>
+</mapper> 

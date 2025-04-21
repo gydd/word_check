@@ -99,4 +99,58 @@ public class PointController {
     public ApiResponse<PointsDTO> getUserPointsLegacy(HttpServletRequest request) {
         return getUserPoints(request);
     }
+    
+    /**
+     * 扣减用户积分
+     *
+     * @param request HTTP请求
+     * @param params 请求参数
+     * @return 扣减结果
+     */
+    @PostMapping("/deduct")
+    @Operation(summary = "扣减用户积分")
+    public ApiResponse<PointsDTO> deductPoints(
+            HttpServletRequest request,
+            @RequestBody(required = true) java.util.Map<String, Object> params
+    ) {
+        try {
+            Integer userId = (Integer) request.getAttribute("userId");
+            
+            if (userId == null) {
+                return ApiResponse.error(401, "未登录或登录已过期");
+            }
+            
+            // 获取参数
+            Integer points = null;
+            String reason = null;
+            
+            if (params.containsKey("points")) {
+                try {
+                    points = Integer.parseInt(params.get("points").toString());
+                } catch (NumberFormatException e) {
+                    return ApiResponse.error(400, "积分数量必须是整数");
+                }
+            }
+            
+            if (params.containsKey("reason")) {
+                reason = params.get("reason").toString();
+            }
+            
+            // 验证参数
+            if (points == null || points <= 0) {
+                return ApiResponse.error(400, "扣减积分数量必须大于0");
+            }
+            
+            if (reason == null || reason.trim().isEmpty()) {
+                reason = "消费";
+            }
+            
+            // 调用服务扣减积分
+            PointsDTO result = pointService.deductPoints(userId, points, reason);
+            return ApiResponse.success(result);
+        } catch (Exception e) {
+            log.error("扣减用户积分失败", e);
+            return ApiResponse.error(500, "扣减用户积分失败: " + e.getMessage());
+        }
+    }
 } 

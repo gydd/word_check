@@ -1081,20 +1081,103 @@ function shouldUseMockMode() {
   return useMock || appUseMock;
 }
 
+/**
+ * 保存检测历史记录
+ * @param {Object} data 检测结果数据
+ * @returns {Promise} 保存结果的Promise
+ */
+function saveCheckHistory(data) {
+  const token = getAuthHeader();
+  
+  if (!token) {
+    return Promise.reject(new Error('未登录'));
+  }
+  
+  if (!data) {
+    return Promise.reject(new Error('无数据可保存'));
+  }
+  
+  // 准备保存数据
+  const saveData = {
+    title: data.title || '检测记录',
+    content: data.textContent || data.content || '',
+    modelId: data.modelId || 1,
+    checkType: '文本检测',
+    point: data.pointCost || 1, // 消耗的积分数
+    result: data
+  };
+  
+  // 获取模型信息
+  if (data.modelInfo) {
+    saveData.modelId = data.modelInfo.id || data.modelId || 1;
+    saveData.modelName = data.modelInfo.name || '未知模型';
+  } else if (data.result && data.result.modelInfo) {
+    saveData.modelId = data.result.modelInfo.id || data.modelId || 1;
+    saveData.modelName = data.result.modelInfo.name || '未知模型';
+  } else {
+    saveData.modelName = data.modelName || '未知模型';
+  }
+  
+  console.log('[wordCheckApi] 保存历史记录数据:', saveData);
+  
+  // 构建正确的URL，检查baseUrl是否已包含/api/v1
+  let url = '';
+  if (app.globalData.baseUrl.includes('/api/v1')) {
+    // 如果baseUrl已包含/api/v1，则直接使用
+    url = app.globalData.baseUrl + '/check-history';
+  } else {
+    // 否则添加/api/v1前缀
+    url = app.globalData.baseUrl + '/api/v1/check-history';
+  }
+  
+  console.log('[wordCheckApi] 保存历史记录URL:', url);
+  
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: url,
+      method: 'POST',
+      data: saveData,
+      header: {
+        'content-type': 'application/json',
+        'Authorization': token
+      },
+      success: (res) => {
+        console.log('[wordCheckApi] 保存历史记录响应:', res);
+        if (res.statusCode === 200) {
+          const data = res.data;
+          
+          if (data.error === 0) {
+            resolve(data.body);
+          } else {
+            const errMsg = data.message || '保存历史记录失败';
+            reject(new Error(errMsg));
+          }
+        } else {
+          const errMsg = `HTTP错误: ${res.statusCode}`;
+          reject(new Error(errMsg));
+        }
+      },
+      fail: (err) => {
+        console.error('保存历史记录请求失败:', err);
+        reject(err);
+      }
+    });
+  });
+}
+
 // 导出模块
 module.exports = {
-  ERROR_TYPES,
   checkWord,
   uploadAndCheck,
   uploadFileCheck,
   getCheckResult,
   getUserPoints,
   getCheckHistory,
-  getCheckStats,
   getPointsRecords,
+  getCheckStats,
   createRechargeOrder,
-  // 新增的工具函数
   diagnoseApiPaths,
   mockCheckWord,
-  shouldUseMockMode
+  shouldUseMockMode,
+  saveCheckHistory
 }; 

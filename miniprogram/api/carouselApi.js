@@ -1,6 +1,6 @@
 // carouselApi.js
-const app = getApp();
-const config = require('../config/config.js');
+import { request, getErrorMessage } from '../utils/requestUtil';
+import config from '../config/config';
 
 // 错误类型常量
 const ERROR_TYPES = {
@@ -19,7 +19,7 @@ const ERROR_TYPES = {
  */
 function handleApiResponse(res, resolve, reject) {
   if (res.statusCode !== 200) {
-    const errorMsg = getErrorMessage(res.statusCode);
+    const errorMsg = getStatusErrorMessage(res.statusCode);
     console.error('轮播图API请求失败:', res);
     reject(new Error(errorMsg));
     return;
@@ -50,7 +50,7 @@ function handleApiResponse(res, resolve, reject) {
  * @param {Number} statusCode HTTP状态码
  * @returns {String} 错误信息
  */
-function getErrorMessage(statusCode) {
+function getStatusErrorMessage(statusCode) {
   switch (statusCode) {
     case 400:
       return '请求参数错误';
@@ -69,103 +69,15 @@ function getErrorMessage(statusCode) {
 
 /**
  * 获取轮播图列表
- * @param {Boolean} useCache 是否使用缓存
- * @param {Number} timeout 超时时间(毫秒)，默认10秒
- * @returns {Promise} 返回轮播图数据的Promise
+ * @param {Object} params - 请求参数
+ * @returns {Promise} Promise对象
  */
-function getCarouselList(useCache = true, timeout = 10000) {
-  return new Promise((resolve, reject) => {
-    // 检查缓存
-    if (useCache) {
-      const cacheKey = 'carousel_data';
-      const cacheTime = 'carousel_time';
-      const cachedData = wx.getStorageSync(cacheKey);
-      const cachedTime = wx.getStorageSync(cacheTime);
-      
-      // 缓存10分钟有效
-      if (cachedData && cachedTime && Date.now() - cachedTime < 10 * 60 * 1000) {
-        console.log('使用缓存的轮播图数据');
-        resolve(cachedData);
-        return;
-      }
-    }
-    
-    // 获取默认数据作为备选
-    const defaultData = getDefaultCarouselItems();
-    
-    // 获取token
-    const token = wx.getStorageSync(config.cache.tokenKey) || getApp().globalData.token;
-    
-    if (!token) {
-      console.warn('轮播图API请求：未找到有效token，使用默认数据');
-      resolve(defaultData);
-      return;
-    }
-    
-    // 确保token格式正确
-    const authorization = token.startsWith('Bearer ') ? token : 'Bearer ' + token;
-    
-    // 请求超时计时器
-    let timeoutTimer = null;
-    
-    // 发起请求
-    const requestTask = wx.request({
-      url: `${config.apiBaseUrl}/carousels`,
-      method: 'GET',
-      header: {
-        'Authorization': authorization
-      },
-      success: (res) => {
-        // 清除超时计时器
-        if (timeoutTimer) clearTimeout(timeoutTimer);
-        
-        try {
-          handleApiResponse(res, (data) => {
-            // 检查数据格式，确保是数组
-            if (Array.isArray(data) && data.length > 0) {
-              // 缓存数据 - 限制缓存大小
-              if (JSON.stringify(data).length < 1024 * 50) { // 限制50KB
-                wx.setStorageSync('carousel_data', data);
-                wx.setStorageSync('carousel_time', Date.now());
-              } else {
-                console.warn('轮播图数据过大，不进行缓存');
-              }
-              resolve(data);
-            } else {
-              console.warn('轮播图数据格式不正确或为空，使用默认数据');
-              resolve(defaultData);
-            }
-          }, reject);
-        } catch (error) {
-          console.error('处理轮播图数据出错:', error);
-          resolve(defaultData);
-        }
-      },
-      fail: (err) => {
-        // 清除超时计时器
-        if (timeoutTimer) clearTimeout(timeoutTimer);
-        
-        console.error('获取轮播图列表失败:', err);
-        // 根据错误类型返回不同错误信息
-        if (err.errMsg.includes('timeout')) {
-          reject(new Error(ERROR_TYPES.TIMEOUT_ERROR));
-        } else if (err.errMsg.includes('fail')) {
-          reject(new Error(ERROR_TYPES.NETWORK_ERROR));
-        } else {
-          reject(new Error(err.errMsg || ERROR_TYPES.UNKNOWN_ERROR));
-        }
-        // 返回默认数据
-        resolve(defaultData);
-      }
-    });
-    
-    // 设置超时
-    timeoutTimer = setTimeout(() => {
-      requestTask.abort(); // 中断请求
-      console.error('轮播图请求超时');
-      reject(new Error(ERROR_TYPES.TIMEOUT_ERROR));
-      resolve(defaultData);
-    }, timeout);
+export function getCarouselList(params = {}) {
+  return request({
+    url: '/carousels',
+    method: 'GET',
+    data: params,
+    needAuth: true
   });
 }
 
@@ -204,42 +116,35 @@ function getDefaultCarouselItems() {
 
 /**
  * 记录轮播图查看
- * @param {Number} id 轮播图ID
- * @returns {Promise} 操作结果Promise
+ * @param {String} id - 轮播图ID
+ * @returns {Promise} Promise对象
  */
-function recordView(id) {
+export function recordView(id) {
   if (!id) {
-    console.warn('记录轮播图查看：ID为空');
-    return Promise.resolve(false);
+    return Promise.reject(new Error('轮播图ID不能为空'));
   }
   
-  const token = wx.getStorageSync(config.cache.tokenKey) || getApp().globalData.token;
-  
-  if (!token) {
-    console.warn('记录轮播图查看：未找到有效token');
-    return Promise.resolve(false);
+  return request({
+    url: `/carousels/${id}/view`,
+    method: 'POST',
+    needAuth: true
+  });
+}
+
+/**
+ * 获取轮播图详情
+ * @param {String} id - 轮播图ID
+ * @returns {Promise} Promise对象
+ */
+export function getCarouselDetail(id) {
+  if (!id) {
+    return Promise.reject(new Error('轮播图ID不能为空'));
   }
   
-  // 确保token格式正确
-  const authorization = token.startsWith('Bearer ') ? token : 'Bearer ' + token;
-  
-  return new Promise((resolve) => {
-    // 使用异步方式，不阻塞主流程
-    wx.request({
-      url: `${config.apiBaseUrl}/carousels/${id}/view`,
-      method: 'GET',
-      header: {
-        'Authorization': authorization
-      },
-      success: () => {
-        console.log('记录轮播图查看成功，ID:', id);
-        resolve(true);
-      },
-      fail: (err) => {
-        console.error('记录轮播图查看失败:', err);
-        resolve(false);
-      }
-    });
+  return request({
+    url: `/carousels/${id}`,
+    method: 'GET',
+    needAuth: false
   });
 }
 
@@ -248,7 +153,7 @@ function recordView(id) {
  * @param {Number} id 轮播图ID
  * @returns {Promise} 操作结果Promise
  */
-function recordClick(id) {
+export function recordClick(id) {
   if (!id) {
     console.warn('记录轮播图点击：ID为空');
     return Promise.resolve(false);
@@ -268,7 +173,7 @@ function recordClick(id) {
     // 使用异步方式，不阻塞主流程
     wx.request({
       url: `${config.apiBaseUrl}/carousels/${id}/click`,
-      method: 'GET',
+      method: 'POST',
       header: {
         'Authorization': authorization
       },
@@ -284,9 +189,20 @@ function recordClick(id) {
   });
 }
 
+// 使用ES6导出语法，同时兼容CommonJS
+export default {
+  getCarouselList,
+  recordView,
+  getCarouselDetail, 
+  recordClick,
+  ERROR_TYPES
+};
+
+// 兼容原有的CommonJS导出
 module.exports = {
   getCarouselList,
   recordView,
+  getCarouselDetail,
   recordClick,
   ERROR_TYPES
 }; 

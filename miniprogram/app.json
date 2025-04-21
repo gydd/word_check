@@ -7,7 +7,8 @@
     "pages/upload/upload",
     "pages/result/result",
     "pages/recharge/recharge",
-    "pages/webview/webview"
+    "pages/webview/webview",
+    "pages/history/history"
   ],
   "window": {
     "backgroundTextStyle": "light",

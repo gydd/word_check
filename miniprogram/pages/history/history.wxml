@@ -1,0 +1,57 @@
+<!-- history.wxml -->
+<view class="container">
+  <!-- 页面头部 -->
+  <view class="header">
+    <text class="title">检测历史</text>
+  </view>
+
+  <!-- 加载中状态 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-icon">
+      <image src="/miniprogram/static/images/icons/loading.gif" mode="aspectFit"></image>
+    </view>
+    <text class="loading-text">正在加载历史记录...</text>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-container" wx:if="{{!loading && isEmpty}}">
+    <image class="empty-icon" src="/miniprogram/static/images/icons/empty.png" mode="aspectFit"></image>
+    <text class="empty-text">暂无历史记录</text>
+    <button class="primary-button" bindtap="navigateToCheck">去检测</button>
+  </view>
+
+  <!-- 记录列表 -->
+  <view class="records-container" wx:if="{{!loading && !isEmpty}}">
+    <view class="record-item" wx:for="{{historyList}}" wx:key="id" bindtap="viewRecordDetail" data-id="{{item.id}}">
+      <!-- 记录信息 -->
+      <view class="record-info">
+        <!-- 左侧内容区域 -->
+        <view class="record-content">
+          <view class="record-title">{{item.title || '未命名检测'}}</view>
+          <view class="record-model">模型：{{item.modelName || '默认模型'}}</view>
+          <view class="record-preview">{{item.contentSummary || '无检测内容'}}</view>
+        </view>
+        
+        <!-- 右侧元信息区域 -->
+        <view class="record-meta">
+          <view class="record-time">{{item.createTime}}</view>
+          <view class="record-score">得分：{{item.score || 0}}</view>
+          <view class="record-status {{item.statusClass}}">{{item.statusText}}</view>
+        </view>
+      </view>
+      
+      <!-- 删除按钮 -->
+      <view class="delete-button" catchtap="deleteRecord" data-id="{{item.id}}" data-index="{{index}}">删除</view>
+    </view>
+
+    <!-- 加载更多指示器 -->
+    <view class="loading-more" wx:if="{{loadingMore}}">
+      <text>加载更多...</text>
+    </view>
+    
+    <!-- 全部加载完毕 -->
+    <view class="all-loaded" wx:if="{{!loadingMore && isAllLoaded && historyList.length > 0}}">
+      <text>没有更多记录了</text>
+    </view>
+  </view>
+</view> 

@@ -1,0 +1,238 @@
+/* history.wxss */
+.container {
+  padding: 0 0 30rpx;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+/* 头部样式 */
+.header {
+  padding: 30rpx 30rpx 20rpx;
+  background-color: #ffffff;
+  border-bottom: 2rpx solid #eaeaea;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333333;
+}
+
+.subtitle {
+  font-size: 26rpx;
+  color: #888;
+  margin-top: 10rpx;
+  display: block;
+}
+
+/* 加载中样式 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+}
+
+.loading-icon {
+  width: 100rpx;
+  height: 100rpx;
+  margin-bottom: 20rpx;
+}
+
+.loading-icon image {
+  width: 100%;
+  height: 100%;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #999999;
+}
+
+/* 空状态样式 */
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 160rpx 0;
+}
+
+.empty-icon {
+  width: 180rpx;
+  height: 180rpx;
+  margin-bottom: 30rpx;
+}
+
+.empty-text {
+  font-size: 30rpx;
+  color: #999999;
+  margin-bottom: 40rpx;
+}
+
+.primary-button {
+  width: 240rpx;
+  height: 80rpx;
+  background-color: #4285f4;
+  color: white;
+  font-size: 30rpx;
+  border-radius: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 记录列表样式 */
+.records-container {
+  padding: 20rpx 30rpx;
+}
+
+.record-item {
+  display: flex;
+  position: relative;
+  margin-bottom: 20rpx;
+  background-color: #ffffff;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.record-info {
+  display: flex;
+  flex: 1;
+  padding: 30rpx;
+  overflow: hidden;
+}
+
+/* 记录内容 */
+.record-content {
+  flex: 1;
+  overflow: hidden;
+}
+
+.record-title {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333333;
+  margin-bottom: 10rpx;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.record-preview {
+  font-size: 28rpx;
+  color: #666666;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 记录元数据 */
+.record-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: 20rpx;
+  min-width: 140rpx;
+}
+
+.record-time {
+  font-size: 24rpx;
+  color: #999999;
+  margin-bottom: 10rpx;
+}
+
+/* 记录状态 */
+.record-status {
+  padding: 6rpx 16rpx;
+  font-size: 24rpx;
+  border-radius: 20rpx;
+  text-align: center;
+}
+
+.status-success {
+  background-color: #e8f5e9;
+  color: #4caf50;
+}
+
+.status-pending {
+  background-color: #e3f2fd;
+  color: #2196f3;
+}
+
+.status-failed {
+  background-color: #ffebee;
+  color: #f44336;
+}
+
+/* 删除按钮 */
+.delete-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120rpx;
+  background-color: #ff4d4f;
+  color: white;
+  font-size: 28rpx;
+}
+
+/* 加载更多样式 */
+.loading-more, .all-loaded {
+  text-align: center;
+  padding: 30rpx 0;
+  font-size: 26rpx;
+  color: #999999;
+}
+
+.loading-icon-small {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 10rpx;
+}
+
+.loading-text-small {
+  font-size: 24rpx;
+  color: #888;
+  vertical-align: middle;
+}
+
+/* 全部加载完毕样式 */
+.load-all {
+  text-align: center;
+  padding: 20rpx 0;
+}
+
+.load-all-text {
+  font-size: 24rpx;
+  color: #999;
+  position: relative;
+}
+
+.load-all-text::before,
+.load-all-text::after {
+  content: "";
+  display: inline-block;
+  height: 1px;
+  width: 80rpx;
+  background-color: #e5e5e5;
+  margin: 0 20rpx;
+  vertical-align: middle;
+}
+
+.record-model {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.record-score {
+  font-size: 12px;
+  color: #ff6600;
+  font-weight: bold;
+  margin-bottom: 5px;
+} 

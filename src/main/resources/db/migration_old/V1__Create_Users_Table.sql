@@ -1,0 +1,28 @@
+-- 创建用户表
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    openid VARCHAR(100) NOT NULL UNIQUE,
+    phone VARCHAR(20),
+    nickname VARCHAR(50),
+    avatar_url VARCHAR(255),
+    gender TINYINT DEFAULT 0,
+    status TINYINT NOT NULL DEFAULT 1,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_openid (openid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
+
+-- 创建用户积分表
+CREATE TABLE IF NOT EXISTS user_points (
+    user_id INT PRIMARY KEY,
+    current_points INT NOT NULL DEFAULT 0,
+    total_earned INT NOT NULL DEFAULT 0,
+    total_spent INT NOT NULL DEFAULT 0,
+    level INT NOT NULL DEFAULT 1,
+    level_name VARCHAR(50) DEFAULT '初学者',
+    next_level_points INT DEFAULT 200,
+    last_updated DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户积分表'; 
