@@ -55,21 +55,30 @@ const ERROR_TYPES = {
 
 // 登录状态管理
 const LoginState = {
-  IDLE: 'IDLE',           // 空闲状态，未登录
-  LOGGING_IN: 'LOGGING_IN', // 登录中
-  LOGGED_IN: 'LOGGED_IN',   // 已登录
-  LOGIN_FAILED: 'LOGIN_FAILED', // 登录失败
-  RECOVERING: 'RECOVERING',  // 正在恢复登录状态
+  IDLE: 'IDLE',               // 空闲状态，未登录
+  LOGGING_IN: 'LOGGING_IN',   // 登录中
+  LOGGED_IN: 'LOGGED_IN',     // 已登录
+  LOGIN_FAILED: 'LOGIN_FAILED',  // 登录失败
+  RECOVERING: 'RECOVERING',   // 正在恢复登录状态
   
-  currentState: 'IDLE',    // 当前状态
-  retryCount: 0,           // 重试次数
-  maxRetries: 3,           // 最大重试次数
-  lastError: null,         // 最后一次错误
+  currentState: 'IDLE',       // 当前状态
+  retryCount: 0,              // 重试次数
+  maxRetries: 3,              // 最大重试次数
+  lastError: null,            // 最后一次错误
   
   // 设置状态
   setState: function(state) {
     this.currentState = state;
-    console.log(`登录状态变更为: ${state}`);
+    console.log(`[userApi] 登录状态变更为: ${state}`);
+  },
+  
+  // 重置状态到初始状态
+  reset: function() {
+    console.log('[userApi] 重置登录状态');
+    this.currentState = this.IDLE;
+    this.retryCount = 0;
+    this.lastError = null;
+    return this.IDLE;
   },
   
   // 是否可以重试
@@ -80,7 +89,7 @@ const LoginState = {
   // 增加重试次数
   incrementRetry: function() {
     this.retryCount++;
-    console.log(`登录重试次数: ${this.retryCount}/${this.maxRetries}`);
+    console.log(`[userApi] 登录重试次数: ${this.retryCount}/${this.maxRetries}`);
   },
   
   // 重置重试次数
@@ -427,7 +436,7 @@ const executeLoginWithRetry = function(code, retryCount = 0) {
     };
     
     wx.request({
-      url: `${config.apiBaseUrl}/api/v1/auth/wx-login`,
+      url: `${config.apiBaseUrl}/auth/wx-login`,
       method: 'POST',
       data: requestData,
       timeout: timeout,
@@ -725,7 +734,7 @@ const userApi = {
       
       // 发送请求验证token
     wx.request({
-        url: `${config.apiBaseUrl}/api/v1/user/check-token`,
+        url: `${config.apiBaseUrl}/user/check-token`,
       method: 'GET',
       header: {
           'auth': token
@@ -776,7 +785,7 @@ const userApi = {
       CodeManager.markAsPending(code);
     
     wx.request({
-        url: `${config.apiBaseUrl}/api/v1/auth/wx-login`,
+        url: `${config.apiBaseUrl}/auth/wx-login`,
       method: 'POST',
         timeout: 15000, // 增加超时时间到15秒
       header: {
@@ -1092,7 +1101,7 @@ const userApi = {
     const executeWithRetry = (retryCount = 0) => {
       return new Promise((resolve, reject) => {
     wx.request({
-          url: `${config.apiBaseUrl}/api/v1/user/bind-phone`,
+          url: `${config.apiBaseUrl}/user/bind-phone`,
       method: 'POST',
           timeout: 10000, // 设置10秒超时
       header: {
@@ -1196,7 +1205,7 @@ const userApi = {
         });
       }
       
-      const requestUrl = `${config.apiBaseUrl}/api/v1/user`;
+      const requestUrl = `${config.apiBaseUrl}/user`;
       const requestHeaders = {
         'content-type': 'application/json',
         'Authorization': 'Bearer ' + token
@@ -1208,7 +1217,7 @@ const userApi = {
         url: requestUrl,
         method: 'GET',
         header: requestHeaders,
-        success: function(res) {
+      success: function(res) {
           if (res.statusCode === 200 && res.data) {
             // 检查后端统一响应格式
             if (res.data.error === 0 && res.data.body) {
@@ -1227,7 +1236,7 @@ const userApi = {
               }
               
               resolve(userData);
-            } else {
+          } else {
               // API返回了错误码
               reject({
                 type: ERROR_TYPES.SERVER_ERROR,
@@ -1247,7 +1256,7 @@ const userApi = {
               message: '登录已过期，请重新登录',
               statusCode: res.statusCode
             });
-          } else {
+        } else {
             // 其他HTTP错误
             reject({
               type: ERROR_TYPES.UNKNOWN_ERROR,
@@ -1255,17 +1264,17 @@ const userApi = {
               statusCode: res.statusCode,
               data: res.data
             });
-          }
-        },
-        fail: function(err) {
+        }
+      },
+      fail: function(err) {
           reject({
             type: ERROR_TYPES.NETWORK_ERROR,
             message: '网络请求失败，请检查网络',
             error: err
           });
-        }
-      });
+      }
     });
+  });
   },
   
   // 检查并刷新用户信息

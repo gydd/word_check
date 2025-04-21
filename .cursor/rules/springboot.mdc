@@ -3,8 +3,32 @@ description:
 globs: 
 alwaysApply: true
 ---
+# Spring Boot 后端规范
 
-# Your rule content
+## 项目结构
+- `controller`: 控制层，处理HTTP请求，[src/main/java/com/wordcheck/controller](mdc:src/main/java/com/wordcheck/controller)
+- `service`: 服务层，实现业务逻辑，[src/main/java/com/wordcheck/service](mdc:src/main/java/com/wordcheck/service)
+- `mapper`: MyBatis映射接口，[src/main/java/com/wordcheck/mapper](mdc:src/main/java/com/wordcheck/mapper)
+- `model`: 数据模型，[src/main/java/com/wordcheck/model](mdc:src/main/java/com/wordcheck/model)
+- `dto`: 数据传输对象，[src/main/java/com/wordcheck/dto](mdc:src/main/java/com/wordcheck/dto)
+- `config`: 配置类，[src/main/java/com/wordcheck/config](mdc:src/main/java/com/wordcheck/config)
+- `exception`: 异常处理，[src/main/java/com/wordcheck/exception](mdc:src/main/java/com/wordcheck/exception)
+- `util`: 工具类，[src/main/java/com/wordcheck/util](mdc:src/main/java/com/wordcheck/util)
 
-- You can @ files here
-- You can use markdown but dont have to
+## 配置文件
+- 主配置文件：[src/main/resources/application.properties](mdc:src/main/resources/application.properties)
+- MyBatis映射文件：[src/main/resources/mapper](mdc:src/main/resources/mapper)
+- 数据库迁移文件：[src/main/resources/db/migration](mdc:src/main/resources/db/migration)
+
+## 数据库设计
+数据库表设计文档: [database.md](mdc:database.md)
+
+## 依赖管理
+Maven 配置文件: [pom.xml](mdc:pom.xml)
+
+## 开发规范
+1. Controller 仅负责参数校验和调用 Service，不包含业务逻辑
+2. Service 实现放在 impl 子包中
+3. 使用统一的响应格式返回数据
+4. 使用全局异常处理捕获异常
+5. DTO 和 VO 分别用于接收和返回数据

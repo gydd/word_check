@@ -94,6 +94,49 @@
   font-size: 28rpx;
 }
 
+/* AI模型选择样式 */
+.ai-model-section {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.model-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.model-item:last-child {
+  border-bottom: none;
+}
+
+.model-info {
+  margin-left: 20rpx;
+}
+
+.model-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.model-provider {
+  font-size: 24rpx;
+  color: #888;
+  margin-top: 4rpx;
+}
+
 /* 内容区域样式 */
 .content {
   flex: 1;
@@ -116,15 +159,21 @@
 
 .text-input {
   width: 100%;
-  min-height: 400rpx;
+  min-height: 200rpx;
   padding: 20rpx;
   box-sizing: border-box;
-  line-height: 1.5;
+  background-color: #f9f9f9;
+  border-radius: 10rpx;
   font-size: 28rpx;
   color: #333;
-  border: 2rpx solid #e8e8e8;
-  border-radius: 8rpx;
-  background-color: #fafafa;
+  line-height: 1.5;
+  border: 1px solid #ddd;
+  transition: all 0.3s ease;
+}
+
+.empty-input {
+  border: 1px solid #ffcc00;
+  background-color: rgba(255, 204, 0, 0.05);
 }
 
 .placeholder {
@@ -142,7 +191,28 @@
 .text-tips {
   margin-top: 20rpx;
   font-size: 24rpx;
-  color: #888;
+  color: #999;
+  line-height: 1.5;
+}
+
+.empty-tip {
+  color: #ff6600;
+  font-weight: 500;
+  font-size: 26rpx;
+  animation: pulse 2s infinite;
+  display: block;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
 }
 
 /* 文件检测样式 */
@@ -239,39 +309,137 @@
 
 /* 操作区域样式 */
 .action-area {
-  margin-top: auto;
-  padding: 20rpx 0;
+  padding: 30rpx 0;
 }
 
+/* 提交按钮样式 */
 .submit-button {
-  width: 100%;
+  width: 90%;
   height: 88rpx;
-  line-height: 88rpx;
-  text-align: center;
-  background-color: #1890ff;
-  color: #fff;
-  font-size: 32rpx;
+  background-color: #3a86ff;
+  color: white;
   border-radius: 44rpx;
-  margin-bottom: 20rpx;
+  font-size: 32rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 30rpx auto;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 4rpx 10rpx rgba(58, 134, 255, 0.3);
+  transition: all 0.3s ease;
 }
 
+/* 禁用状态按钮样式 */
 .submit-button.disabled {
-  background-color: #bfbfbf;
-  color: #f5f5f5;
+  background-color: #cccccc;
+  color: #888888;
+  box-shadow: none;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* 按钮悬停效果 */
+.button-hover {
+  transform: translateY(2rpx);
+  box-shadow: 0 2rpx 5rpx rgba(58, 134, 255, 0.2);
+  opacity: 0.9;
+}
+
+/* 按钮内容布局 */
+.button-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 按钮文本 */
+.button-text {
+  margin-right: 8rpx;
+}
+
+/* 提交中旋转图标 */
+.button-icon {
+  display: inline-block;
+  animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .action-tips {
   text-align: center;
   font-size: 26rpx;
-  color: #999;
-}
-
-/* 链接文本样式 */
-.link-text {
-  color: #1890ff;
-  text-decoration: underline;
 }
 
 .error-text {
+  color: #666;
+}
+
+.link-text {
+  color: #1890ff;
+  margin-left: 8rpx;
+}
+
+/* 调试信息样式 */
+.debug-info {
+  margin-top: 20rpx;
+  padding: 20rpx;
+  background-color: #f0f0f0;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.debug-info view {
+  margin-bottom: 10rpx;
+}
+
+/* 状态信息样式 */
+.status-info {
+  margin: 16rpx 0;
+  text-align: center;
+  font-size: 26rpx;
+  color: #666;
+  padding: 8rpx;
+  border-radius: 8rpx;
+}
+
+.status-info .error-text {
   color: #ff4d4f;
+}
+
+.points-info {
+  margin-top: 20rpx;
+  font-size: 24rpx;
+  color: #888;
+  background-color: #f9f9f9;
+  padding: 12rpx;
+}
+
+.button-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.button-text {
+  margin-right: 5px;
+}
+
+.button-icon {
+  font-size: 16px;
+  animation: rotating 1.5s linear infinite;
+  display: inline-block;
+}
+
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 } 

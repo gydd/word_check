@@ -1,0 +1,72 @@
+// iconGenerator.js - 动态生成图标
+const fsm = wx.getFileSystemManager();
+
+// 图标的base64编码
+const ICONS = {
+  // 检查图标 - 简单的放大镜图标
+  check: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAABLFJREFUaEPtWV1oHFUUPufOJmuaYmgbEaQPpSLaFyn4UAwY3aYPIlRUsD6oCEXwQRChJpvdaWlnZnfTdma3TTdiC/qgoIgiqA9FUPGhSOmDUlpBfBDRUoTYQrXZZO89ciY7YZPd7Mzszta4d16G4d5zz/ed850f7hL4nxv9z/HDMoDlCNQ7AocOHVq1sLAwMjo6ulDvd7g+r30KZTKZzcx8kIi2AsBGAGjR9+ecx4joPBF9W6lUjo+Pj/9Rr8jUHEAmk2ksFotHiGgvEa2vdkEi+pWZx7LZ7Mla+1MTAJ/PN0gp9SURbakx4kvNi4jGhBDDtbxf1QBSqZQLEU8Q0Qs1Blr92LfMvDcQCPyy1AtVAUilUu8Q0ftEZPs2q3GrVEMB4ICUcngxZ5YEoJeCMcZdRHTaGFMkojYAWFuNx0u0/R0ANkspL9zPh/sCSKfTncaYswDwkG5kjJkkosestZ+Gw+FI/UJ+642JROIZACgS0WrdmYgSrusOjI2NfX/fYO4HIOl53tf2Mty9DPHgqq7rPuW67rKA0QNdKpU6DgBv6yAaY1IxxuwYGRm5WumARQGoVOplY8y0fdh13dXZbNYLqWazWRoeHh6NRqNr7Hlr7U+O44yOjIz8uRQA/VksFnsDAD7VbYhoVzgc/rLSuUUBxOPxJ4wxl/XHrbV/OY6zqfoQ1N/oSKVSjQDwKREFrLUXHcfZFolEriwHgM1EIhEgogsA8DDn/FAoFPq40jmLRiCZTDrGmA/t7Jxz+0Oh0If1Dnw1AOx6yWTybQD4CABWcM7Ph0KhZ6sBcFXPSimfBwA7c7vW2vOO4/TVQRGqA2D7SqlsjLlARLaA/1jn/MFQKPTTQuf7ppA9nEql3gKA4wAQY+ZQMBj87j4HvCYA2k8ikXiGc36WiB4FgK8qlcq+8fFx+69dXlcB4BAR2TcuGGP2j46OXrsPgJoBWL+JROL1SqVySue+MeY5AB7inKuRkZGbtewCvWYmk4lIKe0gXYpGow/09vaWFgFQRQL4fr+fiBIAsF1KuVMP0NPT80A+nz9DRJsB4GQul9u3sLBwzRizHgC2KaU+BIAfstksjIyM2EG/jVb3B+Px+Gat9WdE9HC5XI739fXl7jJ9ABzH6SSiDq31g1LKWVv8ls+11rlMJvN5Pp/fOD09/Sbn/Loxpq1SqewPh8PXa4pAPB7v01p/MTExsUoDOHToUE+pVMrruV3X7Z+cnJxijLWOj4/f1FLNAUgmk89qrU8FAgFmjI2Mjo5esX22tLRsKhQK3xDRGmvtRJPfH/qhrg/5wcHBtoWFhe+JaKvjOFv1HLefHxwcXFUqlU4T0U5r7UQgEBioi5BnMpnN+Xz+vPZr541SCjjnruu6UyMjI9O63/79+5tyudwpInpaa32yvb39hd7e3tuqUxMA9uzAwEBbPp+3OhMHgIoxZsZ13TMTExMzmUzGnc/nB4hoHwB84ziO39YSG5WaiNngpZTbiGib4zgbc7nczNTU1KyU8rjjOGPMfM4Ys832l8vl9nu9Xl2mNtYEYCmP+Xy+R7XWx2w6EdFzwWDwx1r6qzkFanH4XnN9Pt8mpdQsa90xOTl5o1b/lgEsVwaXI1BrBP4B3ZztQD9M+UIAAAAASUVORK5CYII=',
+  
+  // 历史记录图标 - 时钟图标
+  history: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAABQZJREFUaEPtWVtsFFUY/v6ZWbpb2u1KpRiLCYYHQzQx3qJgJEYSH1ATMcYLPBgTDQnRxIQEB2Z2ttUwc2Z3253ZFi8JiYmJ0Rcj8YKJDyZekvhATDRGQ4wPoI0kVGjL7s6c81tnZndpuzvdmW2lJDtn32b+y/ed//vPf84Q/ucD/8/5w20At2tgsTVw9OjRtbOzs6/Ozc1dWOx7fD6/cQuVSqUNAA4S0Q4A2AQAIfu7lHIUEb9DxO+llMdHRkb+WCjIBQEYGBjwu1yuISI6SESP+O3FSqkLxpjjAHDE7/f/vBBgCwLQaDTWOxyOL4hoWyBg9QIA+BWAgfX19b/k8/l6LRvC9XpdnYnoAyL6tFQqfRMIBJxKqfMAsAkRn6jF6S60OUtEz3k8nvO9+tETQK1We56IPgOAYPvCUsrTvu7WQp/9BgBPDQ8P/9LNlq4A+vv712iatgEArrYXU0odD4fDhYVGdT7zT58+vVYpVSCiRzpsXdY07a2xsbEPuwVyVwCc8/eJaLNSaioUCj1bLBZ9I+l0dCQSaRQKhbBSatxaG4/HIxrn/DAibldKnZFSPp7JZGbS6fSXiPiytXaSc84GBwcv99pOHQDY9hmGMYGIASnlQDqdfrfXYt3mlUqlnADwCQAEpZTHxsbG3p/P9/Xr119SKBROAcA6IcRQNpvNdsotaoDzRCIRFkKc1XX9UH5+0yxkQCqVelNK+QUAONrtdvv4+PjP7fPPnDnjHhsbm9Q0LcQ5f7VWq30DAKs1TXsxk8mMdzMA0uk0CSE+JqJ1QoiRbDb7bL8AGOeDRFQAACeAHVLK8+12xOPxtUKIcQBYLaU8ks1mjzPGVFteDyHid0KIHblcbqpdFhEhYwyVUsc0TduchyGEOATAWpEQIgcAG7TWp3Rdf6WfiTPOXwOAowDwmxDiyVwud7HbjfWsAdM0NxHRD/lX7yTi2YC2mxBCDA0PD59ljI222y2EeFfX9fc453uUUscB4DdN056amJj4s1OuHnXAON+jlPpICDGUzWY/mM9WrTXGGCOinQBwRtf1fdlstpTJZEIzMzMWyGeEEEd0XX+Hcx5WSn0KABeEEDtyudzvnXKdF0A8Ht8shDirado2m7T7vX0Mw9irlJoEgMuapj01MTFx1TTNJ5VSFnE9kUjkZdd8BiilNE0bzOVyP3bL1RMAYywshJgGgEdtoPMBsBfknO+VUh5DxOs+n2/3yMjINbstSqWSf25uzhLUKIR4Rtf1H7rl6gpgcHDQOzs7a23TDdZiUkrrd3Q+ALZNhmHsU0pZpTDb2NgYzufzc/ZChULBNzMzY6XQTUTcrev65W65ugKoVqsrAeAHsGSWEOJJXdev2At3qgFL1oZhvK6U+goAHrPJ26aEYRj7lVITiDgNAE/ruv5jt1y3RKBUKq2am5ubBoD1Ukpr+1QBAJEOEmpVomEYrwDAcQBYK6W0tj81m81mIBC4xBh7QSn1NQBccTqdO0dHR6+1y3UkMed8LRHVAOCKruv+nlVouZ00DOOAEOJI61J7qrnL4FJa9lCtVncR0beIOOD3+y+1ks4g4s729lmsbLcdMLTRtKK2HQCeQ8RtbrebTSaTG2dnZ08CwBan07ktm81eu9kApotF68tCodBqt9s9SUTbHQ7HVvulCQC/OByOHZOTkzdspzbjCy0oADu65XJ5pdvtniKi7X6//+LNJnIrgNzWwEJr4F8hGbsFYDuPFAAAAABJRU5ErkJggg==',
+  
+  // 积分图标 - 硬币图标
+  points: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAA85JREFUaEPtmVtsFFUYx//fmS27DaUtfTJqTHwwokZjohgjEInhQYyJ8URMI6CJiQnhgdTL7Gxry8zZuczOFi9ICCY+YIyJRo0vGhOCMdFEH4wajYkxEaO0pWy7Ozvfd+bssmV32V5mZwuJe16anPOd7/t9/++cM9MZ4CE/+CHnx38AaehASJLUHpg/DvAp5DzX6WYNjKpAq2JjgCIAj9BXoLzfSIDhFUAwILhiiGj6vhII9Ivm/QKPnUJd85wf3QNLf1f2AkbgH0n95DV9t6v4Q4M0WjqY/e7EZDoAgBqWTI2FNLVQ9rPmRrO90QCiHJqeNWYzcHafHsldAgAJvcBwf1afOZDT3MXuYkGWs/psdjcm0+kvKaG9KJb3rjMa9qCJJ5HzRWxAZXYDzJy1qyJBmN0AkwCI3s7CpnKwOHD7pOF71a3U2AXwtDFVMIwF131KzA5YA5GkqpwZgWlrq5NUTToAKymcHrEGQEQQBaFUMCsB6Kbb9Q6YLQSQZqFBVjDrCahgjQNYi+XKLQLYtGlTm2ma3URUaGhoOH/58mW3XE0rEmCUPtN0zI+6GaZrjunaMd00Y/YxlI1JA5PW1+mpfTbVumMAu3bt6rBt+wIRrWKMXQGwi3N+ulwRK7UPGrrDcWf1UEJzIg7vCrKbZn3Dqm7LcHkXs6llwGw07LY1NcGJYkIxcSipu4eiCQ1P/EQkIAgxIYg7Ow1bCLCrVQbm6nIBuE09B9AJABdFUdzKGPujEoDRgzHfYlrUUJ+26p2j8bQ1FA23+6JpV1Mj4T8G4ukhscONBuJpLxoO23Kk9eYzYp+9bnxMQHe18iblRQFUVd3JGDsBIFdqW3H9Mj8MAIqi7CWiIwDu5PN5pbGx8XapHc8Xs+pGhzwB7ASAMwC2M8auLVclngeQZXk7EZ0GkHNdtyeRSHxXDsLTAN3d3R2RSGQAwAMAWDab3VbupfA0QCwWWyMIwlkiWut53pFEInFopQw8fQvJsrwewFkiavU8b38ikfhoJQieBlAU5bB1aAbgANjHOT+yEoSnASRJ2gNgAMBNy7L2xOPxwd8F8KtlWW+rqvpxqXF/yRSSJOkAgOMAfL9arzU1NR0vPpuVbOK5Dthvoeu6R4noT9u2d7e0tFwtdd9fBLAHwFP2HPeYVVVdQ0S9hmFsLHWfLwBwzmOSJJ2y/7edz+c/aG5ufr3Ufb4AYD+KVFV9johO2SveMMaOlbq/lwDY/xVUVX2ZiN4D4BDRPs754eUw/AVT/7NrJE0wuAAAAABJRU5ErkJggg==',
+  
+  // 充值图标 - 钱包图标
+  recharge: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAABNRJREFUaEPtWU1sVFUU/s59M0On09K2UwhtGhKDGDWu3GhMXBp1hdGF0YVxYaIriZgYAoGWKR3m/cz8zHvTKQlBE01cGF24MjFxZWJijCRqookbAxFaqrSF/sx779zj3JmWgTKlnffalFLm7mbeu+d+5zvfPT/3DsEK/9EKjx8rBP7vDAwPDz9ZKpU+A/B8uVy+NDEx8ed/QrvJGRgcHNxdLBbHieg5AGuY+e9CoXAik8l8slwkmiIwOjrasbCw8A0RbavHhJlviuJYJpN5YzkINEzAcZw+Zv6aiFKNMGDmPhQEttm2fa7e+oYIDA0N9RSLRS/8VD3jN79vjHnZ87wzSeNLJjAyMrKuUCj8QERPJ3V+83pmvprNZjeOj48vJLGRiEA2m30JwJdJHN3qWma+boyRWvklqZ/YBBzHcY0xe+oBUqlU3FKpFORyuVbEGtuGSMqyrAnf9y/HMRCLgOu6W40xPxDRg2FHzPwbEW0wxnxQrVa/isVkmVY6jrOPiN4GcI2ZtxUKhcuxCAwMDJiurq7PiWh3+CEzT4VOpbW/lFJfLlMsDbuRbY3svSBEdnd3704KomYGBgYGXqpUKqNE9FBVmC32b9uYL5xfseeCcb86XolS0/zLZmZTqVSl02dOnXrlBsXoQC0CAwMDW8vlcnCjsJzUGPN91M78MtE7lUrtJaJtAIqe533DzL8Q0aOCVTCPE+JBAENEdIiZP1JK3dK/JQRGRkaeLBQKHnOQ6jUkElZ7WF1KqWVlQFrUfD7/SLVajQAElc6yrD7P886GPMbHx7e2t7eLbdwShM0EXNcVh8dCxMx8RCn1XhLQbNt+jYg+jrHucWb+QghkMpnYGQhvNCcnJw8T0SF5ZuaDSYGz2ewQMwtiMV0QczQROd333HEXsO0+5p73JnI51gG4ZTWVBHC4VngTgEYZEAJElDTqyHYfAG8AeCrGXCFwSbLPzCeVUlHNqLm2hoDrurfUnuClLUqpUxLoKEUHxllT0qQIHjmvLXo/q9uLhQUAr98Ezsyf1cIqOt5YHYiC9n3/DQCLRJjZaK2PeJ53Qb4fFkS5XA4dMXO+KocAfvV9f5e27cVUEkAEULzouaOjY09bW9vJcL+UUvdNY2LkcDQpL1GUwl3uMY+ZA7m0bftNy7JOSIqZeVRr/W6tbLJer9Jac9Tr8H2/x/O8P0J7dQlI2izLOk5E+5l5Xmt9OJ/Pf1snC4t2mNlora1cLict/Ckhaa3fbsSvJQJh70JEHwKQvfkiM+/XWk9JFuQWGAUVvhNE+8C27V2WZQWXwOBGaIw5q7XuSdK6NCQgBvL5/JpqtfohEclO/xsz79ZaXxcHdZ43EFGdaK0XS++95y+klHpB3i1FCRKVUNhxXfdFZv6KiB4wxtywLGtnZ2fnuVZ2fAQgfUF3d/d2y7K+IyKpBglU2sP9zDwn/YPW+lorlNoeGYoZiRzL/E1E0h7Iu9NxCGSz2ceZeZqI1t6BaSzJRlwCYliCiDL/LfF9VnL7XLMvHAl8SdwHAMwYYzZ7nnetlSBCW4kIiINsNvskM18golhabyaIpASCo8Jb0wGc1Vq/3awDtd9LTEAMyYwihXQJfn9Tgq+Z9Vd2SSTi1ogBISEzjXRT79QiI3FsNUWg0QCXcv2KJLCUYCf9dkUS+BcCE4RA3HxzIQAAAABJRU5ErkJggg=='
+};
+
+// 保存图标到文件
+function saveIconToFile(iconType, iconData) {
+  // 提取Base64数据部分(去除data:image/png;base64,前缀)
+  const base64Data = iconData.split(',')[1];
+  // 构建保存路径
+  const filePath = `${wx.env.USER_DATA_PATH}/${iconType}-icon.png`;
+  
+  try {
+    // 将Base64解码并写入文件
+    fsm.writeFileSync(filePath, base64Data, 'base64');
+    console.log(`[iconGenerator] 成功生成图标: ${iconType}`);
+    return filePath;
+  } catch (error) {
+    console.error(`[iconGenerator] 生成图标失败: ${iconType}`, error);
+    return null;
+  }
+}
+
+// 初始化系统所需的所有图标
+function initIcons() {
+  console.log('[iconGenerator] 开始初始化图标...');
+  const iconTypes = Object.keys(ICONS);
+  const generatedIcons = {};
+  
+  // 生成所有图标
+  for (let i = 0; i < iconTypes.length; i++) {
+    const iconType = iconTypes[i];
+    const iconData = ICONS[iconType];
+    const filePath = saveIconToFile(iconType, iconData);
+    if (filePath) {
+      generatedIcons[iconType] = filePath;
+    }
+  }
+  
+  console.log('[iconGenerator] 图标初始化完成');
+  return generatedIcons;
+}
+
+// 复制生成的图标到static目录
+function copyIconsToStatic() {
+  // 由于小程序环境限制，无法直接写入到static目录
+  // 这里只生成到临时目录，并返回路径
+  return initIcons();
+}
+
+// 导出API
+module.exports = {
+  initIcons,
+  copyIconsToStatic,
+  getIconPath: function(iconType) {
+    // 构建固定图标路径
+    return `/static/images/icons/${iconType}-icon.png`;
+  }
+}; 

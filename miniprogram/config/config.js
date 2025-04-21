@@ -4,7 +4,7 @@
 
 module.exports = {
   // API基础URL，与app.js中保持一致
-  apiBaseUrl: 'http://127.0.0.1:8080',
+  apiBaseUrl: 'http://127.0.0.1:8080/api/v1',
   
   // 版本号
   version: '1.0.0',
@@ -24,5 +24,10 @@ module.exports = {
     tokenKey: 'token',            // token存储键名
     userInfoKey: 'userInfo',      // 用户信息存储键名
     tokenExpireKey: 'tokenExpire' // token过期时间存储键名
+  },
+  
+  // 资源配置
+  resources: {
+    defaultAvatar: '/static/images/default-avatar.png'  // 默认头像路径
   }
 }; 

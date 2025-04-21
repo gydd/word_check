@@ -10,6 +10,9 @@ import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
@@ -83,5 +86,23 @@ public class WebConfig implements WebMvcConfigurer {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
+    }
+
+    /**
+     * 配置RestTemplate
+     */
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate(clientHttpRequestFactory());
+    }
+    
+    /**
+     * 配置HTTP请求工厂
+     */
+    private ClientHttpRequestFactory clientHttpRequestFactory() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(60000); // 连接超时时间（毫秒）
+        factory.setReadTimeout(60000);     // 读取超时时间（毫秒）
+        return factory;
     }
 } 

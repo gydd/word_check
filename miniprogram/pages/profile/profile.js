@@ -191,13 +191,18 @@ Page({
     // 将用户头像URL设置为默认头像
     if (this.data.userInfo) {
       let userInfo = this.data.userInfo;
+      // 检查路径格式，确保使用正确的相对路径
       userInfo.avatarUrl = '/static/images/default-avatar.png';
+      
+      // 更新页面数据
       this.setData({
         userInfo: userInfo
       });
       
       // 更新缓存中的用户信息，避免每次进入页面都出现错误
       wx.setStorageSync('userInfo', userInfo);
+      
+      console.log('已更新为默认头像:', userInfo.avatarUrl);
     }
   },
 
